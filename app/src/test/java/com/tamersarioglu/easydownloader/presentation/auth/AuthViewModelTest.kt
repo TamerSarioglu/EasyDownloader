@@ -22,28 +22,28 @@ import org.mockito.MockitoAnnotations
 
 /**
  * Unit tests for AuthViewModel focusing on authentication state persistence functionality.
- * 
+ *
  * Tests cover:
  * - Checking for existing valid tokens on app startup
- * - Implementing automatic login for returning users  
+ * - Implementing automatic login for returning users
  * - Handling token expiration and logout scenarios
- * 
+ *
  * Requirements: 2.5, 2.6, 5.2, 5.3
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthViewModelTest {
 
     private lateinit var authViewModel: AuthViewModel
-    
+
     @Mock
     private lateinit var mockRegisterUseCase: RegisterUseCase
-    
+
     @Mock
     private lateinit var mockLoginUseCase: LoginUseCase
-    
+
     @Mock
     private lateinit var mockRepository: VideoDownloaderRepository
-    
+
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
@@ -64,28 +64,28 @@ class AuthViewModelTest {
 
         // When - Create AuthViewModel (this triggers checkAuthenticationStatus in init)
         authViewModel = AuthViewModel(mockRegisterUseCase, mockLoginUseCase, mockRepository)
-        
+
         // Advance the test dispatcher to execute all pending coroutines
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then - Verify that the authentication check methods exist and work
         val uiState = authViewModel.uiState.value
         assertFalse("User should be logged out when not authenticated", uiState.isLoggedIn)
-        
+
         // Test that the logout method exists and works
         authViewModel.logout()
         testDispatcher.scheduler.advanceUntilIdle()
-        
+
         val logoutState = authViewModel.uiState.value
         assertFalse("User should remain logged out after logout", logoutState.isLoggedIn)
-        
+
         // Test that authentication state check methods exist
         val isAuthenticated = authViewModel.isCurrentlyAuthenticated()
         assertFalse("isCurrentlyAuthenticated should return false", isAuthenticated)
-        
+
         // Test that refresh method exists
         authViewModel.refreshAuthenticationState()
-        
+
         // Test that token expiration handler exists
         authViewModel.handleTokenExpiredDuringUsage()
     }
@@ -99,14 +99,14 @@ class AuthViewModelTest {
 
         // When - Create AuthViewModel
         authViewModel = AuthViewModel(mockRegisterUseCase, mockLoginUseCase, mockRepository)
-        
+
         // Advance the test dispatcher to execute all pending coroutines
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then - User should be logged in
         val uiState = authViewModel.uiState.value
         assertTrue("User should be logged in with valid token", uiState.isLoggedIn)
-        
+
         val isAuthenticated = authViewModel.isCurrentlyAuthenticated()
         assertTrue("isCurrentlyAuthenticated should return true", isAuthenticated)
     }
@@ -120,7 +120,7 @@ class AuthViewModelTest {
 
         // When - Create AuthViewModel
         authViewModel = AuthViewModel(mockRegisterUseCase, mockLoginUseCase, mockRepository)
-        
+
         // Advance the test dispatcher to execute all pending coroutines
         testDispatcher.scheduler.advanceUntilIdle()
 
