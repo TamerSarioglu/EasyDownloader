@@ -4,7 +4,9 @@ import com.tamersarioglu.easydownloader.data.remote.config.NetworkConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
+import java.net.ConnectException
 import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -59,8 +61,8 @@ class RetryInterceptor @Inject constructor() : Interceptor {
     private fun shouldRetry(exception: IOException): Boolean {
         return when (exception) {
             is SocketTimeoutException -> true
-            is java.net.ConnectException -> true
-            is java.net.UnknownHostException -> false // Don't retry DNS failures
+            is ConnectException -> true
+            is UnknownHostException -> false // Don't retry DNS failures
             else -> false
         }
     }
