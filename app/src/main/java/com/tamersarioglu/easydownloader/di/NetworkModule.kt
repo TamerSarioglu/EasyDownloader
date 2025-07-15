@@ -30,12 +30,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    
+
     // DataStore extension property
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
         name = NetworkConfig.DATASTORE_NAME
     )
-    
+
     /**
      * Provides DataStore for preferences storage
      */
@@ -44,7 +44,7 @@ object NetworkModule {
     fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         return context.dataStore
     }
-    
+
     /**
      * Provides JSON serializer configuration
      */
@@ -57,7 +57,7 @@ object NetworkModule {
             encodeDefaults = true
         }
     }
-    
+
     /**
      * Provides HTTP logging interceptor for debug builds
      */
@@ -69,7 +69,7 @@ object NetworkModule {
             level = HttpLoggingInterceptor.Level.BODY
         }
     }
-    
+
     /**
      * Provides configured OkHttp client with interceptors and timeouts
      */
@@ -90,7 +90,7 @@ object NetworkModule {
             .retryOnConnectionFailure(true)
             .build()
     }
-    
+
     /**
      * Provides configured Retrofit instance with Kotlinx Serialization
      */
@@ -108,7 +108,7 @@ object NetworkModule {
             )
             .build()
     }
-    
+
     /**
      * Provides API service implementation
      */
