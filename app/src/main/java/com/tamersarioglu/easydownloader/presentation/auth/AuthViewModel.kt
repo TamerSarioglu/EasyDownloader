@@ -35,7 +35,7 @@ class AuthViewModel @Inject constructor(
 
     private fun checkAuthenticationStatus() {
         _uiState.value = _uiState.value.copy(isLoading = true)
-        
+
         viewModelScope.launch {
             try {
                 val isAuthenticated = repository.isAuthenticated()
@@ -72,11 +72,21 @@ class AuthViewModel @Inject constructor(
                         is AppError.UnauthorizedError -> {
                             handleTokenExpiration()
                         }
+
                         is AppError.NetworkError -> {
-                            _uiState.value = _uiState.value.copy(isLoggedIn = true, isLoading = false, username = "")
+                            _uiState.value = _uiState.value.copy(
+                                isLoggedIn = true,
+                                isLoading = false,
+                                username = ""
+                            )
                         }
+
                         else -> {
-                            _uiState.value = _uiState.value.copy(isLoggedIn = true, isLoading = false, username = "")
+                            _uiState.value = _uiState.value.copy(
+                                isLoggedIn = true,
+                                isLoading = false,
+                                username = ""
+                            )
                         }
                     }
                 }
@@ -92,7 +102,8 @@ class AuthViewModel @Inject constructor(
         } catch (e: Exception) {
         }
 
-        _uiState.value = _uiState.value.copy(isLoggedIn = false, isLoading = false, username = "", error = null)
+        _uiState.value =
+            _uiState.value.copy(isLoggedIn = false, isLoading = false, username = "", error = null)
     }
 
     fun updateRegistrationUsername(username: String) {
@@ -216,7 +227,8 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun clearErrors() {
-        _registrationForm.value = _registrationForm.value.copy(usernameError = null, passwordError = null)
+        _registrationForm.value =
+            _registrationForm.value.copy(usernameError = null, passwordError = null)
         _loginForm.value = _loginForm.value.copy(usernameError = null, passwordError = null)
     }
 
@@ -227,15 +239,19 @@ class AuthViewModel @Inject constructor(
             is AppError.ValidationError -> {
                 when (error.field) {
                     "username" -> {
-                        _registrationForm.value = _registrationForm.value.copy(usernameError = error.message)
+                        _registrationForm.value =
+                            _registrationForm.value.copy(usernameError = error.message)
                         _loginForm.value = _loginForm.value.copy(usernameError = error.message)
                     }
+
                     "password" -> {
-                        _registrationForm.value = _registrationForm.value.copy(passwordError = error.message)
+                        _registrationForm.value =
+                            _registrationForm.value.copy(passwordError = error.message)
                         _loginForm.value = _loginForm.value.copy(passwordError = error.message)
                     }
                 }
             }
+
             is AppError.ApiError -> {
                 val message = when (error.code) {
                     "USER_EXISTS" -> "Username already exists. Please choose a different username."
@@ -245,19 +261,24 @@ class AuthViewModel @Inject constructor(
                 }
                 _uiState.value = _uiState.value.copy(error = message)
             }
+
             is AppError.NetworkError -> {
                 _uiState.value = _uiState.value.copy(
                     error = "Network error. Please check your connection and try again."
                 )
             }
+
             is AppError.ServerError -> {
                 _uiState.value = _uiState.value.copy(
                     error = "Server is temporarily unavailable. Please try again later."
                 )
             }
+
             is AppError.UnauthorizedError -> {
-                _uiState.value = _uiState.value.copy(error = "Authentication failed. Please try again.")
+                _uiState.value =
+                    _uiState.value.copy(error = "Authentication failed. Please try again.")
             }
+
             else -> {
                 _uiState.value = _uiState.value.copy(
                     error = "An unexpected error occurred. Please try again."
