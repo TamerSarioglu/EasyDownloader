@@ -17,7 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,7 +32,9 @@ import java.util.*
 @Composable
 fun VideoListScreen(
     modifier: Modifier = Modifier,
-    viewModel: VideoListViewModel = hiltViewModel()
+    viewModel: VideoListViewModel = hiltViewModel(),
+    onNavigateToSubmission: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pullToRefreshState = rememberPullToRefreshState()
@@ -301,7 +305,7 @@ private fun ErrorState(
                 text = error,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -355,7 +359,7 @@ private fun EmptyState(
                 text = "Submit your first video URL to get started!",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -372,4 +376,68 @@ private fun formatDate(dateString: String): String {
         // Fallback to original string if parsing fails
         dateString
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EmptyStatePreview() {
+    EmptyState()
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ErrorStatePreview() {
+    ErrorState(
+        error = "Network error occurred",
+        onRetry = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoadingStatePreview() {
+    LoadingState()
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun VideoItemCardPreview() {
+    VideoItemCard(
+        video = VideoItem(
+            id = "1",
+            originalUrl = "https://www.example.com/video/123",
+            status = VideoStatus.PENDING,
+            createdAt = "2023-10-01T12:00:00"
+        ),
+        onStatusUpdate = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun VideoListPreview() {
+    VideoList(
+        videos = listOf(
+            VideoItem(
+                id = "1",
+                originalUrl = "https://www.example.com/video/123",
+                status = VideoStatus.PENDING,
+                createdAt = "2023-10-01T12:00:00"
+            ),
+            VideoItem(
+                id = "2",
+                originalUrl = "https://www.example.com/video/456",
+                status = VideoStatus.COMPLETE,
+                createdAt = "2023-10-02T14:30:00"
+            ),
+            VideoItem(
+                id = "3",
+                originalUrl = "https://www.example.com/video/789",
+                status = VideoStatus.FAILED,
+                errorMessage = "Failed to download video",
+                createdAt = "2023-10-03T16:45:00"
+            )
+        ),
+        onVideoStatusUpdate = {}
+    )
 }

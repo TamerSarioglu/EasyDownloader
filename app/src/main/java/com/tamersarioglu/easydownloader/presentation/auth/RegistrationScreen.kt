@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,13 +52,21 @@ import com.tamersarioglu.easydownloader.ui.theme.EasyDownloaderTheme
 fun RegistrationScreen(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onRegistrationSuccess: () -> Unit = {}
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
     val registrationForm by authViewModel.registrationForm.collectAsState()
     val focusManager = LocalFocusManager.current
     
     var passwordVisible by remember { mutableStateOf(false) }
+    
+    // Handle registration success
+    LaunchedEffect(authUiState.isLoggedIn) {
+        if (authUiState.isLoggedIn) {
+            onRegistrationSuccess()
+        }
+    }
     
     Box(
         modifier = modifier.fillMaxSize()

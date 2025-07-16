@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,13 +63,21 @@ import com.tamersarioglu.easydownloader.ui.theme.EasyDownloaderTheme
 fun LoginScreen(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
-    onNavigateToRegistration: () -> Unit
+    onNavigateToRegistration: () -> Unit,
+    onLoginSuccess: () -> Unit = {}
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
     val loginForm by authViewModel.loginForm.collectAsState()
     val focusManager = LocalFocusManager.current
     
     var passwordVisible by remember { mutableStateOf(false) }
+    
+    // Handle login success
+    LaunchedEffect(authUiState.isLoggedIn) {
+        if (authUiState.isLoggedIn) {
+            onLoginSuccess()
+        }
+    }
     
     Box(
         modifier = modifier.fillMaxSize()

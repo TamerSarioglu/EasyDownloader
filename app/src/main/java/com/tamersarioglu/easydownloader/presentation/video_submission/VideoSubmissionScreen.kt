@@ -46,7 +46,9 @@ import com.tamersarioglu.easydownloader.ui.theme.EasyDownloaderTheme
 @Composable
 fun VideoSubmissionScreen(
     modifier: Modifier = Modifier,
-    viewModel: VideoSubmissionViewModel = hiltViewModel()
+    viewModel: VideoSubmissionViewModel = hiltViewModel(),
+    onNavigateToVideoList: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
