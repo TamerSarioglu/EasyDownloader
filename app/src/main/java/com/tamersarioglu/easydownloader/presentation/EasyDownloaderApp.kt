@@ -14,9 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
 import com.tamersarioglu.easydownloader.presentation.auth.AuthViewModel
-import com.tamersarioglu.easydownloader.presentation.screens.AuthenticatedContent
-import com.tamersarioglu.easydownloader.presentation.screens.UnauthenticatedContent
+import com.tamersarioglu.easydownloader.presentation.navigation.VideoDownloaderNavigation
 
 @Composable
 fun EasyDownloaderApp(
@@ -24,31 +24,23 @@ fun EasyDownloaderApp(
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
+    val navController = rememberNavController()
     
     LaunchedEffect(Unit) {
+        // Initial authentication check is handled in AuthViewModel
     }
     
-    Scaffold(
-        modifier = modifier.fillMaxSize()
-    ) { innerPadding ->
-        when {
-            authUiState.isLoading -> {
-                LoadingScreen(modifier = Modifier.padding(innerPadding))
-            }
-            
-            authUiState.isLoggedIn -> {
-                AuthenticatedContent(
-                    modifier = modifier.padding(innerPadding),
-                    onLogout = { authViewModel.logout() }
-                )
-            }
-            
-            else -> {
-                UnauthenticatedContent(
-                    modifier = modifier.padding(innerPadding),
-                    authViewModel = authViewModel
-                )
-            }
+    when {
+        authUiState.isLoading -> {
+            LoadingScreen(modifier = modifier)
+        }
+        
+        else -> {
+            VideoDownloaderNavigation(
+                modifier = modifier,
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
     }
 }

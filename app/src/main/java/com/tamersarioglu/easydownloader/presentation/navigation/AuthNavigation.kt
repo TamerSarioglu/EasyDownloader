@@ -32,7 +32,8 @@ fun AuthNavigation(
                 authViewModel = authViewModel,
                 onNavigateToLogin = {
                     navController.navigate(AuthRoutes.LOGIN) {
-                        popUpTo(AuthRoutes.REGISTRATION) { inclusive = false }
+                        // Don't create multiple instances of login screen
+                        launchSingleTop = true
                     }
                 }
             )
@@ -42,8 +43,14 @@ fun AuthNavigation(
             LoginScreen(
                 authViewModel = authViewModel,
                 onNavigateToRegistration = {
-                    navController.navigate(AuthRoutes.REGISTRATION) {
-                        popUpTo(AuthRoutes.LOGIN) { inclusive = false }
+                    // Navigate back to registration or pop back stack if coming from registration
+                    if (navController.previousBackStackEntry?.destination?.route == AuthRoutes.REGISTRATION) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(AuthRoutes.REGISTRATION) {
+                            // Don't create multiple instances of registration screen
+                            launchSingleTop = true
+                        }
                     }
                 }
             )
