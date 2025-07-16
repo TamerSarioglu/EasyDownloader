@@ -13,12 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-/**
- * Content shown when user is authenticated.
- * This is a placeholder that will be replaced with actual app screens in future tasks.
- * 
- * Requirements: 5.2, 5.3 (logout functionality)
- */
 @Composable
 fun AuthenticatedContent(
     modifier: Modifier = Modifier,

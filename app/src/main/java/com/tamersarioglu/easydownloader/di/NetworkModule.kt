@@ -22,31 +22,20 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-/**
- * Hilt module providing network-related dependencies
- * Configures Retrofit, OkHttp, and related networking components
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    // DataStore extension property
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
         name = NetworkConfig.DATASTORE_NAME
     )
 
-    /**
-     * Provides DataStore for preferences storage
-     */
     @Provides
     @Singleton
     fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         return context.dataStore
     }
 
-    /**
-     * Provides JSON serializer configuration
-     */
     @Provides
     @Singleton
     fun provideJson(): Json {
@@ -57,21 +46,14 @@ object NetworkModule {
         }
     }
 
-    /**
-     * Provides HTTP logging interceptor for debug builds
-     */
     @Provides
     @Singleton
     fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
-            // Enable logging for debug builds - you can change this based on build variant
             level = HttpLoggingInterceptor.Level.BODY
         }
     }
 
-    /**
-     * Provides configured OkHttp client with interceptors and timeouts
-     */
     @Provides
     @Singleton
     fun provideOkHttpClient(
@@ -90,9 +72,6 @@ object NetworkModule {
             .build()
     }
 
-    /**
-     * Provides configured Retrofit instance with Kotlinx Serialization
-     */
     @Provides
     @Singleton
     fun provideRetrofit(
@@ -108,9 +87,6 @@ object NetworkModule {
             .build()
     }
 
-    /**
-     * Provides API service implementation
-     */
     @Provides
     @Singleton
     fun provideVideoDownloaderApiService(retrofit: Retrofit): VideoDownloaderApiService {

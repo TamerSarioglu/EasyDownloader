@@ -8,10 +8,6 @@ import okhttp3.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * OkHttp interceptor that automatically adds JWT authentication headers to requests
- * Excludes authentication endpoints to avoid circular dependencies
- */
 @Singleton
 class AuthInterceptor @Inject constructor(
     private val tokenManager: TokenManager
@@ -20,7 +16,6 @@ class AuthInterceptor @Inject constructor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
         
-        // Check if this endpoint requires authentication
         val requiresAuth = NetworkConfig.EXCLUDED_AUTH_ENDPOINTS.none { endpoint ->
             originalRequest.url.pathSegments.contains(endpoint)
         }
@@ -29,7 +24,6 @@ class AuthInterceptor @Inject constructor(
             return chain.proceed(originalRequest)
         }
         
-        // Get token and add to request if available
         val token = runBlocking { tokenManager.getAuthToken() }
         
         return if (token != null) {

@@ -8,9 +8,6 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-/**
- * Utility class for handling API errors and converting them to appropriate exceptions
- */
 object ApiErrorHandler {
     
     private val json = Json {
@@ -18,9 +15,6 @@ object ApiErrorHandler {
         coerceInputValues = true
     }
     
-    /**
-     * Handles API call execution and converts errors to ApiResult
-     */
     suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): ApiResult<T> {
         return try {
             val response = apiCall()
@@ -46,9 +40,6 @@ object ApiErrorHandler {
         }
     }
     
-    /**
-     * Parses error response body and converts to appropriate ApiException
-     */
     private fun <T> parseErrorResponse(response: Response<T>): ApiException {
         val errorBody = response.errorBody()?.string()
         
@@ -60,16 +51,12 @@ object ApiErrorHandler {
         }
     }
     
-    /**
-     * Parses client error responses (4xx)
-     */
     private fun parseClientError(errorBody: String?): ApiException {
         if (errorBody.isNullOrBlank()) {
             return ApiException.HttpError(400, "Bad Request")
         }
         
         return try {
-            // Try to parse as validation error first
             val validationError = json.decodeFromString<ValidationErrorResponse>(errorBody)
             val firstError = validationError.validationErrors?.entries?.firstOrNull()
             if (firstError != null) {
@@ -82,7 +69,6 @@ object ApiErrorHandler {
             }
         } catch (e: Exception) {
             try {
-                // Try to parse as general error
                 val errorResponse = json.decodeFromString<ErrorResponse>(errorBody)
                 ApiException.ServerError(errorResponse.message, errorResponse.code)
             } catch (e: Exception) {
@@ -91,9 +77,6 @@ object ApiErrorHandler {
         }
     }
     
-    /**
-     * Parses server error responses (5xx)
-     */
     private fun parseServerError(errorBody: String?): ApiException {
         if (errorBody.isNullOrBlank()) {
             return ApiException.ServerError("Internal server error", "500")

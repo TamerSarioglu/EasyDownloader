@@ -3,15 +3,6 @@ package com.tamersarioglu.easydownloader.data.mapper
 import com.tamersarioglu.easydownloader.data.remote.dto.*
 import com.tamersarioglu.easydownloader.domain.model.*
 
-/**
- * Extension functions to map between network DTOs and domain models
- */
-
-// DTO to Domain Model Mappers
-
-/**
- * Maps AuthResponse DTO to User domain model
- */
 fun AuthResponse.toDomainModel(): User {
     return User(
         username = username,
@@ -19,9 +10,6 @@ fun AuthResponse.toDomainModel(): User {
     )
 }
 
-/**
- * Maps VideoSummaryDto to VideoItem domain model
- */
 fun VideoSummaryDto.toDomainModel(): VideoItem {
     return VideoItem(
         id = id,
@@ -32,35 +20,26 @@ fun VideoSummaryDto.toDomainModel(): VideoItem {
     )
 }
 
-/**
- * Maps VideoSubmissionResponse to VideoItem domain model
- */
 fun VideoSubmissionResponse.toDomainModel(): VideoItem {
     return VideoItem(
         id = videoId,
-        originalUrl = "", // URL not provided in response, will be set by caller
+        originalUrl = "",
         status = status.toVideoStatus(),
-        createdAt = "", // Creation time not provided in response
+        createdAt = "",
         errorMessage = null
     )
 }
 
-/**
- * Maps VideoStatusResponse to VideoItem domain model
- */
 fun VideoStatusResponse.toDomainModel(): VideoItem {
     return VideoItem(
         id = videoId,
-        originalUrl = "", // URL not provided in response, will be set by caller
+        originalUrl = "",
         status = status.toVideoStatus(),
-        createdAt = "", // Creation time not provided in response
+        createdAt = "",
         errorMessage = errorMessage
     )
 }
 
-/**
- * Maps ErrorResponse to AppError domain model
- */
 fun ErrorResponse.toDomainModel(): AppError {
     return when {
         code == "UNAUTHORIZED" || code == "401" -> AppError.UnauthorizedError
@@ -70,9 +49,6 @@ fun ErrorResponse.toDomainModel(): AppError {
     }
 }
 
-/**
- * Maps ValidationErrorResponse to AppError domain model
- */
 fun ValidationErrorResponse.toDomainModel(): AppError {
     val firstValidationError = validationErrors?.entries?.firstOrNull()
     return if (firstValidationError != null) {
@@ -84,11 +60,6 @@ fun ValidationErrorResponse.toDomainModel(): AppError {
     }
 }
 
-// Domain Model to DTO Mappers (for requests)
-
-/**
- * Creates RegisterRequest from username and password
- */
 fun createRegisterRequest(username: String, password: String): RegisterRequest {
     require(username.isNotBlank()) { "Username cannot be blank" }
     require(password.isNotBlank()) { "Password cannot be blank" }
@@ -101,9 +72,6 @@ fun createRegisterRequest(username: String, password: String): RegisterRequest {
     )
 }
 
-/**
- * Creates LoginRequest from username and password
- */
 fun createLoginRequest(username: String, password: String): LoginRequest {
     require(username.isNotBlank()) { "Username cannot be blank" }
     require(password.isNotBlank()) { "Password cannot be blank" }
@@ -114,9 +82,6 @@ fun createLoginRequest(username: String, password: String): LoginRequest {
     )
 }
 
-/**
- * Creates VideoSubmissionRequest from URL
- */
 fun createVideoSubmissionRequest(url: String): VideoSubmissionRequest {
     require(url.isNotBlank()) { "URL cannot be blank" }
     require(isValidUrl(url)) { "Invalid URL format" }
@@ -126,23 +91,15 @@ fun createVideoSubmissionRequest(url: String): VideoSubmissionRequest {
     )
 }
 
-// Helper Functions
-
-/**
- * Converts string status to VideoStatus enum with null safety
- */
 private fun String.toVideoStatus(): VideoStatus {
     return when (this.uppercase()) {
         "PENDING" -> VideoStatus.PENDING
         "COMPLETE", "COMPLETED" -> VideoStatus.COMPLETE
         "FAILED", "ERROR" -> VideoStatus.FAILED
-        else -> VideoStatus.PENDING // Default to PENDING for unknown statuses
+        else -> VideoStatus.PENDING
     }
 }
 
-/**
- * Basic URL validation
- */
 private fun isValidUrl(url: String): Boolean {
     return try {
         val trimmedUrl = url.trim()
@@ -152,18 +109,10 @@ private fun isValidUrl(url: String): Boolean {
     }
 }
 
-// List Mappers
-
-/**
- * Maps list of VideoSummaryDto to list of VideoItem domain models
- */
 fun List<VideoSummaryDto>.toDomainModel(): List<VideoItem> {
     return this.map { it.toDomainModel() }
 }
 
-/**
- * Maps VideoListResponse to list of VideoItem domain models
- */
 fun VideoListResponse.toDomainModel(): List<VideoItem> {
     return videos.toDomainModel()
 }

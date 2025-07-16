@@ -7,53 +7,24 @@ import com.tamersarioglu.easydownloader.domain.usecase.auth.RegisterParams
 import com.tamersarioglu.easydownloader.domain.usecase.base.BaseUseCase
 import javax.inject.Inject
 
-/**
- * Use case for user registration with input validation.
- * 
- * This use case handles the business logic for user registration, including:
- * - Input validation for username and password
- * - Calling the repository to register the user
- * - Proper error handling and user feedback
- * 
- * Requirements covered: 1.2, 1.4, 1.5
- */
 class RegisterUseCase @Inject constructor(
     private val repository: VideoDownloaderRepository
 ) : BaseUseCase<RegisterParams, User>() {
     
-    /**
-     * Registers a new user with input validation.
-     * 
-     * @param parameters RegisterParams containing username and password
-     * @return Result<User> containing the registered user on success, or error on failure
-     */
     override suspend fun execute(parameters: RegisterParams): Result<User> {
-        // Validate input parameters
         val validationResult = validateInput(parameters.username, parameters.password)
         if (validationResult.isFailure) {
             return validationResult
         }
         
-        // Call repository to register user
         return repository.register(parameters.username.trim(), parameters.password)
     }
     
-    /**
-     * Convenience method for direct parameter passing (maintains backward compatibility).
-     */
     suspend operator fun invoke(username: String, password: String): Result<User> {
         return invoke(RegisterParams(username, password))
     }
     
-    /**
-     * Validates the registration input parameters.
-     * 
-     * @param username The username to validate
-     * @param password The password to validate
-     * @return Result<User> with validation error if invalid, or success if valid
-     */
     private fun validateInput(username: String, password: String): Result<User> {
-        // Validate username
         val trimmedUsername = username.trim()
         when {
             trimmedUsername.isEmpty() -> {
@@ -87,7 +58,6 @@ class RegisterUseCase @Inject constructor(
             }
         }
         
-        // Validate password
         when {
             password.isEmpty() -> {
                 return Result.failure(
@@ -120,20 +90,13 @@ class RegisterUseCase @Inject constructor(
             }
         }
         
-        // If we reach here, validation passed
-        return Result.success(User("", "")) // Dummy user for validation success
+        return Result.success(User("", ""))
     }
     
-    /**
-     * Validates username format (alphanumeric and underscores only).
-     */
     private fun isValidUsernameFormat(username: String): Boolean {
         return username.matches(Regex("^[a-zA-Z0-9_]+$"))
     }
     
-    /**
-     * Validates password format (must contain at least one letter and one number).
-     */
     private fun isValidPasswordFormat(password: String): Boolean {
         val hasLetter = password.any { it.isLetter() }
         val hasDigit = password.any { it.isDigit() }

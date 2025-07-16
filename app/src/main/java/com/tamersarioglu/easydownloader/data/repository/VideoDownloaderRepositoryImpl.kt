@@ -16,10 +16,6 @@ import com.tamersarioglu.easydownloader.domain.repository.VideoDownloaderReposit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Implementation of VideoDownloaderRepository that handles all data operations
- * with proper error handling and token management.
- */
 @Singleton
 class VideoDownloaderRepositoryImpl @Inject constructor(
     private val apiService: VideoDownloaderApiService,
@@ -28,10 +24,8 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
 
     override suspend fun register(username: String, password: String): Result<User> {
         return try {
-            // Validate input parameters
             val request = createRegisterRequest(username, password)
             
-            // Make API call with error handling
             val apiResult = ApiErrorHandler.safeApiCall {
                 apiService.register(request)
             }
@@ -39,7 +33,6 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
             when (apiResult) {
                 is ApiResult.Success -> {
                     val user = apiResult.data.toDomainModel()
-                    // Automatically store the JWT token on successful registration
                     saveAuthToken(user.token)
                     Result.success(user)
                 }
@@ -48,7 +41,6 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: IllegalArgumentException) {
-            // Handle validation errors from createRegisterRequest
             val field = when {
                 e.message?.contains("Username") == true -> "username"
                 e.message?.contains("Password") == true -> "password"
@@ -62,10 +54,8 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
 
     override suspend fun login(username: String, password: String): Result<User> {
         return try {
-            // Validate input parameters
             val request = createLoginRequest(username, password)
             
-            // Make API call with error handling
             val apiResult = ApiErrorHandler.safeApiCall {
                 apiService.login(request)
             }
@@ -73,7 +63,6 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
             when (apiResult) {
                 is com.tamersarioglu.easydownloader.data.remote.api.ApiResult.Success -> {
                     val user = apiResult.data.toDomainModel()
-                    // Automatically store the JWT token on successful login
                     saveAuthToken(user.token)
                     Result.success(user)
                 }
@@ -82,7 +71,6 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: IllegalArgumentException) {
-            // Handle validation errors from createLoginRequest
             val field = when {
                 e.message?.contains("Username") == true -> "username"
                 e.message?.contains("Password") == true -> "password"
@@ -96,10 +84,8 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
 
     override suspend fun submitVideo(url: String): Result<String> {
         return try {
-            // Validate URL format
             val request = createVideoSubmissionRequest(url)
             
-            // Make API call with error handling
             val apiResult = ApiErrorHandler.safeApiCall {
                 apiService.submitVideo(request)
             }
@@ -113,7 +99,6 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: IllegalArgumentException) {
-            // Handle validation errors from createVideoSubmissionRequest
             Result.failure(AppError.ValidationError("url", e.message ?: "Invalid URL"))
         } catch (e: Exception) {
             Result.failure(AppError.NetworkError)
@@ -122,7 +107,6 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
 
     override suspend fun getUserVideos(): Result<List<VideoItem>> {
         return try {
-            // Make API call with error handling
             val apiResult = ApiErrorHandler.safeApiCall {
                 apiService.getUserVideos()
             }
@@ -143,10 +127,8 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
 
     override suspend fun getVideoStatus(videoId: String): Result<VideoItem> {
         return try {
-            // Validate video ID
             require(videoId.isNotBlank()) { "Video ID cannot be blank" }
             
-            // Make API call with error handling
             val apiResult = ApiErrorHandler.safeApiCall {
                 apiService.getVideoStatus(videoId)
             }
@@ -183,9 +165,6 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
         return tokenManager.isAuthenticated()
     }
 
-    /**
-     * Maps ApiException to AppError for consistent error handling across the app
-     */
     private fun mapApiExceptionToAppError(exception: ApiException): AppError {
         return when (exception) {
             is ApiException.NetworkError -> AppError.NetworkError

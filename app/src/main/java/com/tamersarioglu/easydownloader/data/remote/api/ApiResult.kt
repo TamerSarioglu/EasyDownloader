@@ -1,16 +1,10 @@
 package com.tamersarioglu.easydownloader.data.remote.api
 
-/**
- * A generic wrapper for API responses that encapsulates success and error states
- */
 sealed class ApiResult<out T> {
     data class Success<T>(val data: T) : ApiResult<T>()
     data class Error(val exception: ApiException) : ApiResult<Nothing>()
 }
 
-/**
- * Custom exception types for API errors
- */
 sealed class ApiException(override val message: String, cause: Throwable? = null) : Exception(message, cause) {
     object NetworkError : ApiException("Network connection error")
     object TimeoutError : ApiException("Request timeout")
@@ -21,9 +15,6 @@ sealed class ApiException(override val message: String, cause: Throwable? = null
     object UnknownError : ApiException("Unknown error occurred")
 }
 
-/**
- * Extension function to convert ApiResult to standard Result
- */
 fun <T> ApiResult<T>.toResult(): Result<T> {
     return when (this) {
         is ApiResult.Success -> Result.success(data)

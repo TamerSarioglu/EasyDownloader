@@ -47,17 +47,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tamersarioglu.easydownloader.ui.theme.EasyDownloaderTheme
 
-/**
- * Registration screen with Compose that provides user registration functionality.
- * 
- * Features:
- * - Registration form with username and password fields
- * - Input validation with real-time feedback
- * - Loading states and error message display
- * - Navigation to login screen
- * 
- * Requirements: 1.1, 1.2, 1.4, 1.5, 1.6, 7.1, 7.2, 7.4
- */
 @Composable
 fun RegistrationScreen(
     modifier: Modifier = Modifier,
@@ -81,7 +70,6 @@ fun RegistrationScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // App Title
             Text(
                 text = "EasyDownloader",
                 style = MaterialTheme.typography.headlineLarge,
@@ -97,7 +85,6 @@ fun RegistrationScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
             
-            // Registration Form Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -106,7 +93,6 @@ fun RegistrationScreen(
                     modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Username Field
                     OutlinedTextField(
                         value = registrationForm.username,
                         onValueChange = { authViewModel.updateRegistrationUsername(it) },
@@ -147,7 +133,6 @@ fun RegistrationScreen(
                         singleLine = true
                     )
                     
-                    // Password Field
                     OutlinedTextField(
                         value = registrationForm.password,
                         onValueChange = { authViewModel.updateRegistrationPassword(it) },
@@ -206,7 +191,6 @@ fun RegistrationScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // Register Button
                     Button(
                         onClick = { authViewModel.register() },
                         modifier = Modifier.fillMaxWidth(),
@@ -230,7 +214,6 @@ fun RegistrationScreen(
                         }
                     }
                     
-                    // Error Message
                     authUiState.error?.let { error ->
                         Text(
                             text = error,
@@ -245,7 +228,6 @@ fun RegistrationScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Navigation to Login
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -270,7 +252,5 @@ fun RegistrationScreen(
 @Composable
 fun RegistrationScreenPreview() {
     EasyDownloaderTheme {
-        // Note: This preview won't work properly without a real ViewModel
-        // but it shows the UI structure
     }
 }

@@ -18,17 +18,6 @@ import com.tamersarioglu.easydownloader.presentation.auth.AuthViewModel
 import com.tamersarioglu.easydownloader.presentation.screens.AuthenticatedContent
 import com.tamersarioglu.easydownloader.presentation.screens.UnauthenticatedContent
 
-/**
- * Main app composable that handles authentication state persistence and navigation.
- * 
- * This composable:
- * - Checks for existing valid tokens on app startup
- * - Implements automatic login for returning users
- * - Handles token expiration and logout scenarios
- * - Shows appropriate content based on authentication state
- * 
- * Requirements: 2.5, 2.6, 5.2, 5.3
- */
 @Composable
 fun EasyDownloaderApp(
     modifier: Modifier = Modifier,
@@ -36,23 +25,17 @@ fun EasyDownloaderApp(
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
     
-    // Handle authentication state persistence on app startup
     LaunchedEffect(Unit) {
-        // The AuthViewModel automatically checks authentication status in its init block
-        // This LaunchedEffect ensures the check happens when the composable is first created
-        // The ViewModel's checkAuthenticationStatus() is already called in init, so no additional call needed
     }
     
     Scaffold(
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         when {
-            // Show loading while checking authentication status
             authUiState.isLoading -> {
                 LoadingScreen(modifier = Modifier.padding(innerPadding))
             }
             
-            // User is authenticated - show main app content
             authUiState.isLoggedIn -> {
                 AuthenticatedContent(
                     modifier = modifier.padding(innerPadding),
@@ -60,7 +43,6 @@ fun EasyDownloaderApp(
                 )
             }
             
-            // User is not authenticated - show login/registration screens
             else -> {
                 UnauthenticatedContent(
                     modifier = modifier.padding(innerPadding),
@@ -71,9 +53,6 @@ fun EasyDownloaderApp(
     }
 }
 
-/**
- * Loading screen shown while checking authentication status on app startup
- */
 @Composable
 private fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(
