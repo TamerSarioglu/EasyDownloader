@@ -6,6 +6,7 @@ import com.tamersarioglu.easydownloader.data.mapper.createRegisterRequest
 import com.tamersarioglu.easydownloader.data.mapper.createVideoSubmissionRequest
 import com.tamersarioglu.easydownloader.data.mapper.toDomainModel
 import com.tamersarioglu.easydownloader.data.remote.api.ApiErrorHandler
+import com.tamersarioglu.easydownloader.data.remote.api.ApiErrorHandler.safeApiCall
 import com.tamersarioglu.easydownloader.data.remote.api.ApiException
 import com.tamersarioglu.easydownloader.data.remote.api.ApiResult
 import com.tamersarioglu.easydownloader.data.remote.api.VideoDownloaderApiService
@@ -26,7 +27,7 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
         return try {
             val request = createRegisterRequest(username, password)
             
-            val apiResult = ApiErrorHandler.safeApiCall {
+            val apiResult = safeApiCall {
                 apiService.register(request)
             }
             
@@ -56,17 +57,17 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
         return try {
             val request = createLoginRequest(username, password)
             
-            val apiResult = ApiErrorHandler.safeApiCall {
+            val apiResult = safeApiCall {
                 apiService.login(request)
             }
             
             when (apiResult) {
-                is com.tamersarioglu.easydownloader.data.remote.api.ApiResult.Success -> {
+                is ApiResult.Success -> {
                     val user = apiResult.data.toDomainModel()
                     saveAuthToken(user.token)
                     Result.success(user)
                 }
-                is com.tamersarioglu.easydownloader.data.remote.api.ApiResult.Error -> {
+                is ApiResult.Error -> {
                     Result.failure(mapApiExceptionToAppError(apiResult.exception))
                 }
             }
@@ -86,15 +87,15 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
         return try {
             val request = createVideoSubmissionRequest(url)
             
-            val apiResult = ApiErrorHandler.safeApiCall {
+            val apiResult = safeApiCall {
                 apiService.submitVideo(request)
             }
             
             when (apiResult) {
-                is com.tamersarioglu.easydownloader.data.remote.api.ApiResult.Success -> {
+                is ApiResult.Success -> {
                     Result.success(apiResult.data.videoId)
                 }
-                is com.tamersarioglu.easydownloader.data.remote.api.ApiResult.Error -> {
+                is ApiResult.Error -> {
                     Result.failure(mapApiExceptionToAppError(apiResult.exception))
                 }
             }
@@ -107,7 +108,7 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
 
     override suspend fun getUserVideos(): Result<List<VideoItem>> {
         return try {
-            val apiResult = ApiErrorHandler.safeApiCall {
+            val apiResult = safeApiCall {
                 apiService.getUserVideos()
             }
             
@@ -129,7 +130,7 @@ class VideoDownloaderRepositoryImpl @Inject constructor(
         return try {
             require(videoId.isNotBlank()) { "Video ID cannot be blank" }
             
-            val apiResult = ApiErrorHandler.safeApiCall {
+            val apiResult = safeApiCall {
                 apiService.getVideoStatus(videoId)
             }
             

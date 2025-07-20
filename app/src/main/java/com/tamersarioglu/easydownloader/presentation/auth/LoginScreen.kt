@@ -46,35 +46,30 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.tamersarioglu.easydownloader.presentation.auth.login.LoginViewModel
 import com.tamersarioglu.easydownloader.ui.theme.EasyDownloaderTheme
 
-/**
- * Login screen with Compose that provides user authentication functionality.
- * 
- * Features:
- * - Login form with credential input fields
- * - Form validation and error handling
- * - Loading indicators and success feedback
- * - Navigation to registration screen
- * 
- * Requirements: 2.1, 2.2, 2.4, 2.6, 7.1, 7.2, 7.4
- */
+
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel,
+    loginViewModel: LoginViewModel = hiltViewModel(),
+    authStateViewModel: AuthStateViewModel = hiltViewModel(),
     onNavigateToRegistration: () -> Unit,
     onLoginSuccess: () -> Unit = {}
 ) {
-    val authUiState by authViewModel.uiState.collectAsState()
-    val loginForm by authViewModel.loginForm.collectAsState()
+    val loginUiState by loginViewModel.uiState.collectAsState()
+    val loginForm by loginViewModel.formState.collectAsState()
     val focusManager = LocalFocusManager.current
     
     var passwordVisible by remember { mutableStateOf(false) }
     
     // Handle login success
-    LaunchedEffect(authUiState.isLoggedIn) {
-        if (authUiState.isLoggedIn) {
+    LaunchedEffect(loginUiState.isLoginSuccessful) {
+        if (loginUiState.isLoginSuccessful) {
+            authStateViewModel.onAuthenticationSuccess()
+            loginViewModel.resetSuccessState()
             onLoginSuccess()
         }
     }
@@ -118,11 +113,11 @@ fun LoginScreen(
                     // Username Field
                     OutlinedTextField(
                         value = loginForm.username,
-                        onValueChange = { authViewModel.updateLoginUsername(it) },
+                        onValueChange = { loginViewModel.updateUsername(it) },
                         label = { Text("Username") },
                         placeholder = { Text("Enter your username") },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !authUiState.isLoading,
+                        enabled = !loginUiState.isLoading,
                         isError = loginForm.usernameError != null,
                         supportingText = {
                             loginForm.usernameError?.let { error ->
@@ -145,11 +140,11 @@ fun LoginScreen(
                     // Password Field
                     OutlinedTextField(
                         value = loginForm.password,
-                        onValueChange = { authViewModel.updateLoginPassword(it) },
+                        onValueChange = { loginViewModel.updatePassword(it) },
                         label = { Text("Password") },
                         placeholder = { Text("Enter your password") },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !authUiState.isLoading,
+                        enabled = !loginUiState.isLoading,
                         isError = loginForm.passwordError != null,
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
@@ -177,8 +172,8 @@ fun LoginScreen(
                         keyboardActions = KeyboardActions(
                             onDone = { 
                                 focusManager.clearFocus()
-                                if (authViewModel.isLoginFormValid()) {
-                                    authViewModel.login()
+                                if (loginViewModel.isFormValid()) {
+                                    loginViewModel.login()
                                 }
                             }
                         ),
@@ -189,11 +184,11 @@ fun LoginScreen(
                     
                     // Login Button
                     Button(
-                        onClick = { authViewModel.login() },
+                        onClick = { loginViewModel.login() },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !authUiState.isLoading && authViewModel.isLoginFormValid()
+                        enabled = !loginUiState.isLoading && loginViewModel.isFormValid()
                     ) {
-                        if (authUiState.isLoading) {
+                        if (loginUiState.isLoading) {
                             Row(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
@@ -212,7 +207,7 @@ fun LoginScreen(
                     }
                     
                     // Error Message
-                    authUiState.error?.let { error ->
+                    loginUiState.error?.let { error ->
                         Text(
                             text = error,
                             color = MaterialTheme.colorScheme.error,
@@ -238,7 +233,7 @@ fun LoginScreen(
                 )
                 TextButton(
                     onClick = onNavigateToRegistration,
-                    enabled = !authUiState.isLoading
+                    enabled = !loginUiState.isLoading
                 ) {
                     Text("Create Account")
                 }

@@ -10,27 +10,27 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.tamersarioglu.easydownloader.presentation.auth.AuthViewModel
+import com.tamersarioglu.easydownloader.presentation.auth.AuthStateViewModel
 
 @Composable
 fun VideoDownloaderNavigation(
         modifier: Modifier = Modifier,
         navController: NavHostController = rememberNavController(),
-        authViewModel: AuthViewModel = hiltViewModel()
+        authStateViewModel: AuthStateViewModel = hiltViewModel()
 ) {
-    val authUiState by authViewModel.uiState.collectAsState()
+    val authState by authStateViewModel.authState.collectAsState()
 
     // Determine start destination based on authentication state
     val startDestination =
-            if (authUiState.isLoggedIn) {
+            if (authState.isAuthenticated) {
                 Routes.MAIN_GRAPH
             } else {
                 Routes.AUTH_GRAPH
             }
 
     // Handle authentication state changes for navigation
-    LaunchedEffect(authUiState.isLoggedIn) {
-        if (authUiState.isLoggedIn) {
+    LaunchedEffect(authState.isAuthenticated) {
+        if (authState.isAuthenticated) {
             // User just logged in - navigate to main graph and clear auth back stack
             if (navController.currentDestination?.route?.contains(Routes.AUTH_GRAPH) == true) {
                 navController.navigate(Routes.MAIN_GRAPH) {
@@ -56,7 +56,6 @@ fun VideoDownloaderNavigation(
         navigation(startDestination = Routes.REGISTRATION, route = Routes.AUTH_GRAPH) {
             authGraph(
                     navController = navController,
-                    authViewModel = authViewModel,
                     onAuthenticationSuccess = {
                         // Authentication success is handled by LaunchedEffect above
                         // This ensures consistent navigation behavior
@@ -69,7 +68,7 @@ fun VideoDownloaderNavigation(
             mainGraph(
                     navController = navController,
                     onLogout = {
-                        authViewModel.logout()
+                        authStateViewModel.logout()
                         // Logout navigation is handled by LaunchedEffect above
                         // This ensures proper back stack management
                     }

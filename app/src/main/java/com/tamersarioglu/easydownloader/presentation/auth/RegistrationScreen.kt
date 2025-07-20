@@ -46,24 +46,29 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.tamersarioglu.easydownloader.presentation.auth.registration.RegistrationViewModel
 import com.tamersarioglu.easydownloader.ui.theme.EasyDownloaderTheme
 
 @Composable
 fun RegistrationScreen(
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel,
+    registrationViewModel: RegistrationViewModel = hiltViewModel(),
+    authStateViewModel: AuthStateViewModel = hiltViewModel(),
     onNavigateToLogin: () -> Unit,
     onRegistrationSuccess: () -> Unit = {}
 ) {
-    val authUiState by authViewModel.uiState.collectAsState()
-    val registrationForm by authViewModel.registrationForm.collectAsState()
+    val registrationUiState by registrationViewModel.uiState.collectAsState()
+    val registrationForm by registrationViewModel.formState.collectAsState()
     val focusManager = LocalFocusManager.current
     
     var passwordVisible by remember { mutableStateOf(false) }
     
     // Handle registration success
-    LaunchedEffect(authUiState.isLoggedIn) {
-        if (authUiState.isLoggedIn) {
+    LaunchedEffect(registrationUiState.isRegistrationSuccessful) {
+        if (registrationUiState.isRegistrationSuccessful) {
+            authStateViewModel.onAuthenticationSuccess()
+            registrationViewModel.resetSuccessState()
             onRegistrationSuccess()
         }
     }
@@ -104,11 +109,11 @@ fun RegistrationScreen(
                 ) {
                     OutlinedTextField(
                         value = registrationForm.username,
-                        onValueChange = { authViewModel.updateRegistrationUsername(it) },
+                        onValueChange = { registrationViewModel.updateUsername(it) },
                         label = { Text("Username") },
                         placeholder = { Text("Enter your username") },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !authUiState.isLoading,
+                        enabled = !registrationUiState.isLoading,
                         isError = registrationForm.usernameError != null,
                         supportingText = {
                             when {
@@ -144,11 +149,11 @@ fun RegistrationScreen(
                     
                     OutlinedTextField(
                         value = registrationForm.password,
-                        onValueChange = { authViewModel.updateRegistrationPassword(it) },
+                        onValueChange = { registrationViewModel.updatePassword(it) },
                         label = { Text("Password") },
                         placeholder = { Text("Enter your password") },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !authUiState.isLoading,
+                        enabled = !registrationUiState.isLoading,
                         isError = registrationForm.passwordError != null,
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
@@ -190,8 +195,8 @@ fun RegistrationScreen(
                         keyboardActions = KeyboardActions(
                             onDone = { 
                                 focusManager.clearFocus()
-                                if (authViewModel.isRegistrationFormValid()) {
-                                    authViewModel.register()
+                                if (registrationViewModel.isFormValid()) {
+                                    registrationViewModel.register()
                                 }
                             }
                         ),
@@ -201,11 +206,11 @@ fun RegistrationScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     Button(
-                        onClick = { authViewModel.register() },
+                        onClick = { registrationViewModel.register() },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !authUiState.isLoading && authViewModel.isRegistrationFormValid()
+                        enabled = !registrationUiState.isLoading && registrationViewModel.isFormValid()
                     ) {
-                        if (authUiState.isLoading) {
+                        if (registrationUiState.isLoading) {
                             Row(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
@@ -223,7 +228,7 @@ fun RegistrationScreen(
                         }
                     }
                     
-                    authUiState.error?.let { error ->
+                    registrationUiState.error?.let { error ->
                         Text(
                             text = error,
                             color = MaterialTheme.colorScheme.error,
@@ -248,7 +253,7 @@ fun RegistrationScreen(
                 )
                 TextButton(
                     onClick = onNavigateToLogin,
-                    enabled = !authUiState.isLoading
+                    enabled = !registrationUiState.isLoading
                 ) {
                     Text("Sign In")
                 }

@@ -1,0 +1,147 @@
+package com.tamersarioglu.easydownloader.presentation.auth.registration
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tamersarioglu.easydownloader.domain.model.AppError
+import com.tamersarioglu.easydownloader.domain.usecase.RegisterUseCase
+import com.tamersarioglu.easydownloader.presentation.util.ErrorMapper
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+@HiltViewModel
+class RegistrationViewModel @Inject constructor(
+    private val registerUseCase: RegisterUseCase
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(RegistrationUiState())
+    val uiState: StateFlow<RegistrationUiState> = _uiState.asStateFlow()
+
+    private val _formState = MutableStateFlow(RegistrationFormState())
+    val formState: StateFlow<RegistrationFormState> = _formState.asStateFlow()
+
+    fun updateUsername(username: String) {
+        _formState.value = _formState.value.copy(
+            username = username,
+            usernameError = null
+        )
+    }
+
+    fun updatePassword(password: String) {
+        _formState.value = _formState.value.copy(
+            password = password,
+            passwordError = null
+        )
+    }
+
+    fun register(onSuccess: () -> Unit = {}) {
+        val currentForm = _formState.value
+
+        clearErrors()
+
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+        viewModelScope.launch {
+            registerUseCase(
+                username = currentForm.username,
+                password = currentForm.password
+            ).fold(
+                onSuccess = { user ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        isRegistrationSuccessful = true,
+                        username = user.username,
+                        error = null
+                    )
+
+                    _formState.value = RegistrationFormState()
+                    onSuccess()
+                },
+                onFailure = { error -> 
+                    handleRegistrationError(error)
+                }
+            )
+        }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun resetSuccessState() {
+        _uiState.value = _uiState.value.copy(isRegistrationSuccessful = false)
+    }
+
+    private fun clearErrors() {
+        _formState.value = _formState.value.copy(usernameError = null, passwordError = null)
+    }
+
+    private fun handleRegistrationError(error: Throwable) {
+        _uiState.value = _uiState.value.copy(isLoading = false)
+
+        when (error) {
+            is AppError.ValidationError -> {
+                handleValidationError(error)
+            }
+            else -> {
+                _uiState.value = _uiState.value.copy(error = mapErrorToMessage(error))
+            }
+        }
+    }
+
+    private fun handleValidationError(error: AppError.ValidationError) {
+        when (error.field) {
+            "username" -> {
+                _formState.value = _formState.value.copy(usernameError = error.message)
+            }
+            "password" -> {
+                _formState.value = _formState.value.copy(passwordError = error.message)
+            }
+            else -> {
+                // For validation errors without specific field, show as general error
+                _uiState.value = _uiState.value.copy(error = error.message)
+            }
+        }
+    }
+
+    private fun mapErrorToMessage(error: Throwable): String {
+        return when (error) {
+            is AppError.ValidationError -> error.message
+            is AppError.ApiError -> ErrorMapper.mapRegistrationApiErrorToMessage(error)
+            is AppError.NetworkError -> "Network error. Please check your connection and try again."
+            is AppError.ServerError -> "Server is temporarily unavailable. Please try again later."
+            is AppError.UnauthorizedError -> "Authentication failed. Please try again."
+            else -> "An unexpected error occurred. Please try again."
+        }
+    }
+
+    fun isFormValid(): Boolean {
+        val form = _formState.value
+        return form.username.trim().length >= 3 &&
+                form.password.length >= 6 &&
+                form.usernameError == null &&
+                form.passwordError == null
+    }
+
+    fun resetState() {
+        _uiState.value = RegistrationUiState()
+        _formState.value = RegistrationFormState()
+    }
+}
+
+data class RegistrationUiState(
+    val isLoading: Boolean = false,
+    val isRegistrationSuccessful: Boolean = false,
+    val username: String = "",
+    val error: String? = null
+)
+
+data class RegistrationFormState(
+    val username: String = "",
+    val password: String = "",
+    val usernameError: String? = null,
+    val passwordError: String? = null
+)

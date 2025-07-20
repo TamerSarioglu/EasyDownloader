@@ -1,13 +1,13 @@
 [versions]
-agp = "8.12.0-alpha09"
+agp = "8.12.0-rc01"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.9.1"
+lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
-composeBom = "2025.06.01"
+composeBom = "2025.07.00"
 
 # Hilt
 hilt = "2.56.2"
@@ -19,7 +19,7 @@ okhttp = "5.1.0"
 kotlinxSerialization = "1.9.0"
 
 # Navigation
-navigationCompose = "2.9.1"
+navigationCompose = "2.9.2"
 
 # DataStore
 datastore = "1.1.7"
@@ -28,13 +28,13 @@ datastore = "1.1.7"
 coroutines = "1.10.2"
 
 # ViewModel
-lifecycleViewmodel = "2.9.1"
+lifecycleViewmodel = "2.9.2"
 
 # KSP
 ksp = "2.2.0-2.0.2"
 
 # Testing
-mockito = "5.14.2"
+mockito = "5.18.0"
 coroutinesTest = "1.10.2"
 
 [libraries]

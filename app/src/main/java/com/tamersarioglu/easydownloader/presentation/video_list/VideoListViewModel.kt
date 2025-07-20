@@ -36,7 +36,7 @@ class VideoListViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val result = getUserVideosUseCase()
-
+                
                 result.fold(
                     onSuccess = { videos ->
                         _uiState.value = _uiState.value.copy(
@@ -64,7 +64,7 @@ class VideoListViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val result = getUserVideosUseCase()
-
+                
                 result.fold(
                     onSuccess = { videos ->
                         _uiState.value = _uiState.value.copy(
@@ -92,12 +92,12 @@ class VideoListViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val result = getVideoStatusUseCase(videoId)
-
+                
                 result.fold(
                     onSuccess = { updatedVideoItem ->
                         val currentVideos = _uiState.value.videos.toMutableList()
                         val videoIndex = currentVideos.indexOfFirst { it.id == videoId }
-
+                        
                         if (videoIndex != -1) {
                             currentVideos[videoIndex] = updatedVideoItem
                             _uiState.value = _uiState.value.copy(videos = currentVideos)
@@ -139,6 +139,8 @@ class VideoListViewModel @Inject constructor(
                 "Server is temporarily unavailable. Please try again later."
             }
             is AppError.UnauthorizedError -> {
+                // Reset state on authentication error to ensure clean state
+                resetState()
                 "Authentication failed. Please login again."
             }
             is AppError.ApiError -> {
@@ -157,17 +159,21 @@ class VideoListViewModel @Inject constructor(
     }
 
     fun isEmptyState(): Boolean {
-        return _uiState.value.videos.isEmpty() &&
-                !_uiState.value.isLoading &&
-                !_uiState.value.isRefreshing &&
-                _uiState.value.error == null
+        return _uiState.value.videos.isEmpty() && 
+               !_uiState.value.isLoading && 
+               !_uiState.value.isRefreshing &&
+               _uiState.value.error == null
     }
 
     fun refreshPendingVideos() {
         val pendingVideos = getVideosByStatus(VideoStatus.PENDING)
-
+        
         pendingVideos.forEach { video ->
             updateVideoStatus(video.id)
         }
+    }
+
+    fun resetState() {
+        _uiState.value = VideoListUiState()
     }
 }

@@ -209,12 +209,15 @@ class AuthViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             try {
+                // Clear authentication tokens and user data
                 repository.clearAuthToken()
-
+                
+                // Reset all UI states to initial values
                 _uiState.value = AuthUiState()
                 _registrationForm.value = AuthFormState()
                 _loginForm.value = AuthFormState()
             } catch (e: Exception) {
+                // Even if clearing tokens fails, reset UI states to ensure clean logout
                 _uiState.value = AuthUiState()
                 _registrationForm.value = AuthFormState()
                 _loginForm.value = AuthFormState()
@@ -325,6 +328,13 @@ class AuthViewModel @Inject constructor(
         return _uiState.value.isLoggedIn
     }
 }
+
+data class AuthUiState(
+    val isLoggedIn: Boolean = false,
+    val isLoading: Boolean = false,
+    val username: String = "",
+    val error: String? = null
+)
 
 data class AuthFormState(
     val username: String = "",

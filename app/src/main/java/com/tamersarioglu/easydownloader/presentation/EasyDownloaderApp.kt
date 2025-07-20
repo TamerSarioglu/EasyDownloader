@@ -15,23 +15,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.tamersarioglu.easydownloader.presentation.auth.AuthViewModel
+import com.tamersarioglu.easydownloader.presentation.auth.AuthStateViewModel
 import com.tamersarioglu.easydownloader.presentation.navigation.VideoDownloaderNavigation
 
 @Composable
 fun EasyDownloaderApp(
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authStateViewModel: AuthStateViewModel = hiltViewModel()
 ) {
-    val authUiState by authViewModel.uiState.collectAsState()
+    val authState by authStateViewModel.authState.collectAsState()
     val navController = rememberNavController()
     
     LaunchedEffect(Unit) {
-        // Initial authentication check is handled in AuthViewModel
+        // Initial authentication check is handled in AuthStateViewModel
     }
     
     when {
-        authUiState.isLoading -> {
+        authState.isLoading -> {
             LoadingScreen(modifier = modifier)
         }
         
@@ -39,7 +39,7 @@ fun EasyDownloaderApp(
             VideoDownloaderNavigation(
                 modifier = modifier,
                 navController = navController,
-                authViewModel = authViewModel
+                authStateViewModel = authStateViewModel
             )
         }
     }

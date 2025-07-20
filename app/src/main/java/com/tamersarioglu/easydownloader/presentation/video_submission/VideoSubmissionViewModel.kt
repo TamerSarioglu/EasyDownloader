@@ -106,10 +106,18 @@ constructor(private val submitVideoUseCase: SubmitVideoUseCase) : ViewModel() {
             }
             is AppError.NetworkError -> "Network error. Please check your connection and try again."
             is AppError.ServerError -> "Server error. Please try again later."
-            is AppError.UnauthorizedError -> "Authentication error. Please log in again."
+            is AppError.UnauthorizedError -> {
+                // Reset state on authentication error to ensure clean state
+                resetState()
+                "Authentication error. Please log in again."
+            }
             is AppError.ApiError -> error.message
             else -> "An unexpected error occurred. Please try again."
         }
+    }
+
+    fun resetState() {
+        _uiState.value = VideoSubmissionUiState()
     }
 
     fun getSupportedDomains(): List<String> = SUPPORTED_DOMAINS
