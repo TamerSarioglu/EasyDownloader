@@ -113,15 +113,14 @@ class AuthStateViewModel @Inject constructor(
         return _authState.value.isAuthenticated
     }
 
+    /**
+     * Maps domain errors to user-friendly messages for authentication state operations
+     */
     private fun mapErrorToMessage(error: Throwable): String {
-        return when (error) {
-            is AppError.ValidationError -> error.message
-            is AppError.ApiError -> ErrorMapper.mapAuthApiErrorToMessage(error)
-            is AppError.NetworkError -> "Network error. Please check your connection and try again."
-            is AppError.ServerError -> "Server is temporarily unavailable. Please try again later."
-            is AppError.UnauthorizedError -> "Authentication failed. Please try again."
-            else -> "An unexpected error occurred. Please try again."
-        }
+        return ErrorMapper.mapViewModelError(
+            error = error,
+            apiErrorMapper = ErrorMapper::mapAuthApiErrorToMessage
+        )
     }
 
     private fun handleAuthError(error: Throwable) {

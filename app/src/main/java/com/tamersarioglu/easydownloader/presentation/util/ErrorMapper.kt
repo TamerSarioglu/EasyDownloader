@@ -94,4 +94,43 @@ object ErrorMapper {
             else -> error.message.ifEmpty { "An error occurred. Please try again." }
         }
     }
+
+    /**
+     * Standard error mapping pattern for ViewModels to ensure consistency
+     * @param error The throwable error to map
+     * @param apiErrorMapper Specific API error mapper function for the context
+     */
+    fun mapViewModelError(
+        error: Throwable,
+        apiErrorMapper: (AppError.ApiError) -> String = ::mapApiErrorToMessage
+    ): String {
+        return when (error) {
+            is AppError.ValidationError -> error.message
+            is AppError.ApiError -> apiErrorMapper(error)
+            is AppError.NetworkError -> "Network error. Please check your connection and try again."
+            is AppError.ServerError -> "Server is temporarily unavailable. Please try again later."
+            is AppError.UnauthorizedError -> "Authentication failed. Please try again."
+            else -> "An unexpected error occurred. Please try again."
+        }
+    }
+
+    /**
+     * Standard validation error handling pattern for form-based ViewModels
+     * @param error The validation error to handle
+     * @param onUsernameError Callback to handle username validation errors
+     * @param onPasswordError Callback to handle password validation errors
+     * @param onGeneralError Callback to handle general validation errors
+     */
+    fun handleValidationError(
+        error: AppError.ValidationError,
+        onUsernameError: (String) -> Unit,
+        onPasswordError: (String) -> Unit,
+        onGeneralError: (String) -> Unit
+    ) {
+        when (error.field) {
+            "username" -> onUsernameError(error.message)
+            "password" -> onPasswordError(error.message)
+            else -> onGeneralError(error.message)
+        }
+    }
 }

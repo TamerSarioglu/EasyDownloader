@@ -93,29 +93,28 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun handleValidationError(error: AppError.ValidationError) {
-        when (error.field) {
-            "username" -> {
-                _formState.value = _formState.value.copy(usernameError = error.message)
+        ErrorMapper.handleValidationError(
+            error = error,
+            onUsernameError = { message ->
+                _formState.value = _formState.value.copy(usernameError = message)
+            },
+            onPasswordError = { message ->
+                _formState.value = _formState.value.copy(passwordError = message)
+            },
+            onGeneralError = { message ->
+                _uiState.value = _uiState.value.copy(error = message)
             }
-            "password" -> {
-                _formState.value = _formState.value.copy(passwordError = error.message)
-            }
-            else -> {
-                // For validation errors without specific field, show as general error
-                _uiState.value = _uiState.value.copy(error = error.message)
-            }
-        }
+        )
     }
 
+    /**
+     * Maps domain errors to user-friendly messages for login operations
+     */
     private fun mapErrorToMessage(error: Throwable): String {
-        return when (error) {
-            is AppError.ValidationError -> error.message
-            is AppError.ApiError -> ErrorMapper.mapLoginApiErrorToMessage(error)
-            is AppError.NetworkError -> "Network error. Please check your connection and try again."
-            is AppError.ServerError -> "Server is temporarily unavailable. Please try again later."
-            is AppError.UnauthorizedError -> "Authentication failed. Please try again."
-            else -> "An unexpected error occurred. Please try again."
-        }
+        return ErrorMapper.mapViewModelError(
+            error = error,
+            apiErrorMapper = ErrorMapper::mapLoginApiErrorToMessage
+        )
     }
 
     fun isFormValid(): Boolean {
