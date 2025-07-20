@@ -18,7 +18,6 @@ fun NavGraphBuilder.mainGraph(
         VideoSubmissionScreen(
             onNavigateToVideoList = {
                 navController.navigate(Routes.VIDEO_LIST) {
-                    // Don't create multiple instances of video list
                     launchSingleTop = true
                 }
             },
@@ -57,9 +56,7 @@ fun NavGraphBuilder.mainGraph(
         VideoDetailScreen(
             videoId = videoId,
             onNavigateBack = {
-                // Navigate back to previous screen (usually video list)
                 if (!navController.popBackStack()) {
-                    // If no back stack, navigate to video list as fallback
                     navController.navigate(Routes.VIDEO_LIST) {
                         popUpTo(Routes.MAIN_GRAPH) { inclusive = false }
                     }
@@ -71,9 +68,7 @@ fun NavGraphBuilder.mainGraph(
     composable(Routes.SETTINGS) {
         SettingsScreen(
             onNavigateBack = {
-                // Navigate back to previous screen
                 if (!navController.popBackStack()) {
-                    // If no back stack, navigate to video list as fallback
                     navController.navigate(Routes.VIDEO_LIST) {
                         popUpTo(Routes.MAIN_GRAPH) { inclusive = false }
                     }
@@ -83,7 +78,6 @@ fun NavGraphBuilder.mainGraph(
         )
     }
     
-    // Profile route as alias for settings
     composable(Routes.PROFILE) {
         SettingsScreen(
             onNavigateBack = {

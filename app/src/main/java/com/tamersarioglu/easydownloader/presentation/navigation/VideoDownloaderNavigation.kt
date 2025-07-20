@@ -20,7 +20,6 @@ fun VideoDownloaderNavigation(
 ) {
     val authState by authStateViewModel.authState.collectAsState()
 
-    // Determine start destination based on authentication state
     val startDestination =
             if (authState.isAuthenticated) {
                 Routes.MAIN_GRAPH
@@ -28,17 +27,14 @@ fun VideoDownloaderNavigation(
                 Routes.AUTH_GRAPH
             }
 
-    // Handle authentication state changes for navigation
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
-            // User just logged in - navigate to main graph and clear auth back stack
             if (navController.currentDestination?.route?.contains(Routes.AUTH_GRAPH) == true) {
                 navController.navigate(Routes.MAIN_GRAPH) {
                     popUpTo(Routes.AUTH_GRAPH) { inclusive = true }
                 }
             }
         } else {
-            // User logged out or token expired - navigate to auth graph and clear main back stack
             if (navController.currentDestination?.route?.contains(Routes.MAIN_GRAPH) == true) {
                 navController.navigate(Routes.AUTH_GRAPH) {
                     popUpTo(Routes.MAIN_GRAPH) { inclusive = true }
@@ -52,25 +48,19 @@ fun VideoDownloaderNavigation(
             startDestination = startDestination,
             modifier = modifier
     ) {
-        // Authentication navigation graph
         navigation(startDestination = Routes.REGISTRATION, route = Routes.AUTH_GRAPH) {
             authGraph(
                     navController = navController,
                     onAuthenticationSuccess = {
-                        // Authentication success is handled by LaunchedEffect above
-                        // This ensures consistent navigation behavior
                     }
             )
         }
 
-        // Main application navigation graph
         navigation(startDestination = Routes.VIDEO_SUBMISSION, route = Routes.MAIN_GRAPH) {
             mainGraph(
                     navController = navController,
                     onLogout = {
                         authStateViewModel.logout()
-                        // Logout navigation is handled by LaunchedEffect above
-                        // This ensures proper back stack management
                     }
             )
         }

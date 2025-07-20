@@ -42,7 +42,6 @@ fun VideoListScreen(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        // Top App Bar
         TopAppBar(
             title = {
                 Text(
@@ -143,7 +142,6 @@ private fun VideoItemCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Status Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -160,7 +158,6 @@ private fun VideoItemCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // URL
             Text(
                 text = video.originalUrl,
                 style = MaterialTheme.typography.bodyMedium,
@@ -169,7 +166,6 @@ private fun VideoItemCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
             
-            // Error message if failed
             if (video.status == VideoStatus.FAILED && !video.errorMessage.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -179,7 +175,6 @@ private fun VideoItemCard(
                 )
             }
             
-            // Action button for completed videos
             if (video.status == VideoStatus.COMPLETE) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
@@ -367,13 +362,11 @@ private fun EmptyState(
 
 private fun formatDate(dateString: String): String {
     return try {
-        // Assuming the date comes in ISO format, adjust as needed
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val outputFormat = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
         val date = inputFormat.parse(dateString)
         outputFormat.format(date ?: Date())
     } catch (e: Exception) {
-        // Fallback to original string if parsing fails
         dateString
     }
 }

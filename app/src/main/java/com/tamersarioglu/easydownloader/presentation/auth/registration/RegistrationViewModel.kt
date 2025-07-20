@@ -107,9 +107,6 @@ class RegistrationViewModel @Inject constructor(
         )
     }
 
-    /**
-     * Maps domain errors to user-friendly messages for registration operations
-     */
     private fun mapErrorToMessage(error: Throwable): String {
         return ErrorMapper.mapViewModelError(
             error = error,

@@ -1,8 +1,6 @@
 package com.tamersarioglu.easydownloader.domain.model
 
-/**
- * Sealed class representing different types of errors that can occur in the app
- */
+
 sealed class AppError : Exception() {
     data object NetworkError : AppError()
     data object ServerError : AppError()

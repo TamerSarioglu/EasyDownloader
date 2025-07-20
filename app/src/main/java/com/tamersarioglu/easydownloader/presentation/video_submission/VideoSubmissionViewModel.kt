@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamersarioglu.easydownloader.domain.model.AppError
 import com.tamersarioglu.easydownloader.domain.usecase.SubmitVideoUseCase
-import com.tamersarioglu.easydownloader.presentation.util.ErrorMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -95,13 +94,10 @@ constructor(private val submitVideoUseCase: SubmitVideoUseCase) : ViewModel() {
     }
 
     private fun getErrorMessage(error: Throwable): String {
-        // Handle special case for unauthorized errors
         if (error is AppError.UnauthorizedError) {
-            // Reset state on authentication error to ensure clean state
             resetState()
         }
         
-        // Handle special case for URL validation errors
         if (error is AppError.ValidationError && error.field == "url" && 
             error.message.contains("supported platforms")) {
             return "URL must be from supported platforms: ${SUPPORTED_DOMAINS.joinToString(", ")}"
@@ -110,13 +106,9 @@ constructor(private val submitVideoUseCase: SubmitVideoUseCase) : ViewModel() {
         return mapErrorToMessage(error)
     }
     
-    /**
-     * Maps domain errors to user-friendly messages for video submission operations
-     */
     private fun mapErrorToMessage(error: Throwable): String {
         return when (error) {
             is AppError.ApiError -> {
-                // Custom handling for video submission specific API errors
                 when (error.code) {
                     "INVALID_URL" -> "The provided URL is not valid."
                     "UNSUPPORTED_PLATFORM" -> "This video platform is not supported. Supported platforms: ${SUPPORTED_DOMAINS.joinToString(", ")}"
@@ -126,7 +118,6 @@ constructor(private val submitVideoUseCase: SubmitVideoUseCase) : ViewModel() {
                 }
             }
             else -> {
-                // Use the centralized error mapper for common errors
                 com.tamersarioglu.easydownloader.presentation.util.ErrorMapper.mapErrorToMessage(error)
             }
         }

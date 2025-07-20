@@ -65,7 +65,6 @@ fun LoginScreen(
     
     var passwordVisible by remember { mutableStateOf(false) }
     
-    // Handle login success
     LaunchedEffect(loginUiState.isLoginSuccessful) {
         if (loginUiState.isLoginSuccessful) {
             authStateViewModel.onAuthenticationSuccess()
@@ -85,7 +84,6 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // App Title
             Text(
                 text = "EasyDownloader",
                 style = MaterialTheme.typography.headlineLarge,
@@ -101,7 +99,6 @@ fun LoginScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
             
-            // Login Form Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -110,7 +107,6 @@ fun LoginScreen(
                     modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Username Field
                     OutlinedTextField(
                         value = loginForm.username,
                         onValueChange = { loginViewModel.updateUsername(it) },
@@ -137,7 +133,6 @@ fun LoginScreen(
                         singleLine = true
                     )
                     
-                    // Password Field
                     OutlinedTextField(
                         value = loginForm.password,
                         onValueChange = { loginViewModel.updatePassword(it) },
@@ -182,7 +177,6 @@ fun LoginScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // Login Button
                     Button(
                         onClick = { loginViewModel.login() },
                         modifier = Modifier.fillMaxWidth(),
@@ -206,7 +200,6 @@ fun LoginScreen(
                         }
                     }
                     
-                    // Error Message
                     loginUiState.error?.let { error ->
                         Text(
                             text = error,
@@ -221,7 +214,6 @@ fun LoginScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Navigation to Registration
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
@@ -246,7 +238,6 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     EasyDownloaderTheme {
-        // Note: This preview won't work properly without a real ViewModel
-        // but it shows the UI structure
+
     }
 }

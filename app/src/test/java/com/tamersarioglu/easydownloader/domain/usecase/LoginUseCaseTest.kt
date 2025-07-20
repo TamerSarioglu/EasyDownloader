@@ -26,30 +26,28 @@ class LoginUseCaseTest {
     
     @Test
     fun `invoke with valid credentials should return success`() = runTest {
-        // Given
+
         val username = "testuser"
         val password = "password123"
         val expectedUser = User(username, "jwt_token")
         `when`(repository.login(username, password)).thenReturn(Result.success(expectedUser))
         
-        // When
         val result = loginUseCase(username, password)
         
-        // Then
         assertTrue(result.isSuccess)
         assertEquals(expectedUser, result.getOrNull())
     }
     
     @Test
     fun `invoke with empty username should return validation error`() = runTest {
-        // Given
+
         val username = ""
         val password = "password123"
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull() as AppError.ValidationError
         assertEquals("username", error.field)
@@ -58,14 +56,14 @@ class LoginUseCaseTest {
     
     @Test
     fun `invoke with whitespace-only username should return validation error`() = runTest {
-        // Given
+
         val username = "   "
         val password = "password123"
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull() as AppError.ValidationError
         assertEquals("username", error.field)
@@ -74,14 +72,14 @@ class LoginUseCaseTest {
     
     @Test
     fun `invoke with short username should return validation error`() = runTest {
-        // Given
+
         val username = "ab"
         val password = "password123"
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull() as AppError.ValidationError
         assertEquals("username", error.field)
@@ -90,14 +88,14 @@ class LoginUseCaseTest {
     
     @Test
     fun `invoke with empty password should return validation error`() = runTest {
-        // Given
+
         val username = "testuser"
         val password = ""
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull() as AppError.ValidationError
         assertEquals("password", error.field)
@@ -106,14 +104,14 @@ class LoginUseCaseTest {
     
     @Test
     fun `invoke with short password should return validation error`() = runTest {
-        // Given
+
         val username = "testuser"
         val password = "12345" // 5 characters, less than minimum 6
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull() as AppError.ValidationError
         assertEquals("password", error.field)
@@ -122,79 +120,79 @@ class LoginUseCaseTest {
     
     @Test
     fun `invoke with LoginParams should work correctly`() = runTest {
-        // Given
+
         val params = LoginParams("testuser", "password123")
         val expectedUser = User("testuser", "jwt_token")
         `when`(repository.login("testuser", "password123")).thenReturn(Result.success(expectedUser))
         
-        // When
+
         val result = loginUseCase(params)
         
-        // Then
+
         assertTrue(result.isSuccess)
         assertEquals(expectedUser, result.getOrNull())
     }
     
     @Test
     fun `invoke should trim username whitespace`() = runTest {
-        // Given
+
         val username = "  testuser  "
         val password = "password123"
         val expectedUser = User("testuser", "jwt_token")
         `when`(repository.login("testuser", "password123")).thenReturn(Result.success(expectedUser))
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isSuccess)
         assertEquals(expectedUser, result.getOrNull())
     }
     
     @Test
     fun `invoke with repository error should return repository error`() = runTest {
-        // Given
+
         val username = "testuser"
         val password = "wrongpassword"
         val apiError = AppError.ApiError("INVALID_CREDENTIALS", "Invalid username or password")
         `when`(repository.login("testuser", "wrongpassword")).thenReturn(Result.failure(apiError))
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         assertEquals(apiError, result.exceptionOrNull())
     }
     
     @Test
     fun `invoke with network error should return network error`() = runTest {
-        // Given
+
         val username = "testuser"
         val password = "password123"
         val networkError = AppError.NetworkError
         `when`(repository.login("testuser", "password123")).thenReturn(Result.failure(networkError))
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         assertEquals(networkError, result.exceptionOrNull())
     }
     
     @Test
     fun `invoke with unauthorized error should return unauthorized error`() = runTest {
-        // Given
+
         val username = "testuser"
         val password = "password123"
         val unauthorizedError = AppError.UnauthorizedError
         `when`(repository.login("testuser", "password123")).thenReturn(Result.failure(unauthorizedError))
         
-        // When
+
         val result = loginUseCase(username, password)
         
-        // Then
+
         assertTrue(result.isFailure)
         assertEquals(unauthorizedError, result.exceptionOrNull())
     }

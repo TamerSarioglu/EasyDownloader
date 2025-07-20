@@ -1,29 +1,21 @@
 package com.tamersarioglu.easydownloader.data.remote.interceptor
 
-import com.tamersarioglu.easydownloader.data.local.TokenManager
 import com.tamersarioglu.easydownloader.data.remote.config.NetworkConfig
-import kotlinx.coroutines.test.runTest
 import okhttp3.Interceptor
-import okhttp3.Request
-import okhttp3.Response
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.mockito.Mockito.*
 
-/**
- * Unit tests for AuthInterceptor
- * Tests authentication header injection functionality
- */
+
 class AuthInterceptorTest {
     
     @Test
     fun `AuthInterceptor class should exist and implement Interceptor`() {
         val authInterceptorClass = AuthInterceptor::class.java
         
-        // Verify class exists
         assertNotNull(authInterceptorClass)
         
-        // Verify it implements Interceptor interface
         val interfaces = authInterceptorClass.interfaces
         assertTrue("AuthInterceptor should implement Interceptor interface", 
             interfaces.any { it == Interceptor::class.java })
@@ -32,8 +24,6 @@ class AuthInterceptorTest {
     @Test
     fun `AuthInterceptor should have proper annotations`() {
         val authInterceptorClass = AuthInterceptor::class.java
-        
-        // Verify @Singleton annotation exists
         val annotations = authInterceptorClass.annotations.map { it.annotationClass.simpleName }
         assertTrue("AuthInterceptor should have @Singleton annotation", annotations.contains("Singleton"))
     }

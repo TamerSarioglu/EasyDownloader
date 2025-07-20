@@ -59,14 +59,12 @@ class AuthStateViewModel @Inject constructor(
                         handleTokenExpiration()
                     }
                     is AppError.NetworkError -> {
-                        // Assume authenticated if network error (offline scenario)
                         _authState.value = _authState.value.copy(
                             isAuthenticated = true,
                             isLoading = false
                         )
                     }
                     else -> {
-                        // For other errors, assume authenticated but log the issue
                         _authState.value = _authState.value.copy(
                             isAuthenticated = true,
                             isLoading = false
@@ -113,9 +111,6 @@ class AuthStateViewModel @Inject constructor(
         return _authState.value.isAuthenticated
     }
 
-    /**
-     * Maps domain errors to user-friendly messages for authentication state operations
-     */
     private fun mapErrorToMessage(error: Throwable): String {
         return ErrorMapper.mapViewModelError(
             error = error,
@@ -124,25 +119,20 @@ class AuthStateViewModel @Inject constructor(
     }
 
     private fun handleAuthError(error: Throwable) {
-        // Map the error to a user-friendly message (for logging or UI display if needed)
-        val errorMessage = mapErrorToMessage(error)
-        
+
         when (error) {
             is AppError.UnauthorizedError -> {
-                // Handle token expiration
                 viewModelScope.launch { 
                     handleTokenExpiration() 
                 }
             }
             is AppError.NetworkError -> {
-                // For network errors during auth check, assume authenticated (offline scenario)
                 _authState.value = _authState.value.copy(
                     isAuthenticated = true,
                     isLoading = false
                 )
             }
             else -> {
-                // For other errors during auth operations, log but don't change auth state
                 _authState.value = _authState.value.copy(isLoading = false)
             }
         }

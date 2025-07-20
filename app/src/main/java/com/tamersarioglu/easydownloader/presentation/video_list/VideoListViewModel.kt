@@ -90,8 +90,6 @@ class VideoListViewModel @Inject constructor(
                     }
                 },
                 onFailure = { _ ->
-                    // Silently handle individual video status update failures
-                    // to avoid disrupting the overall UI experience
                 }
             )
         }
@@ -114,9 +112,7 @@ class VideoListViewModel @Inject constructor(
     }
 
     private fun handleError(error: Throwable) {
-        // Handle special case for unauthorized errors
         if (error is AppError.UnauthorizedError) {
-            // Reset state on authentication error to ensure clean state
             resetState()
         }
         
@@ -129,13 +125,9 @@ class VideoListViewModel @Inject constructor(
         )
     }
     
-    /**
-     * Maps domain errors to user-friendly messages for video list operations
-     */
     private fun mapErrorToMessage(error: Throwable): String {
         return when (error) {
             is AppError.ApiError -> {
-                // Custom handling for video list specific API errors
                 when (error.code) {
                     "NO_VIDEOS_FOUND" -> "You don't have any videos yet."
                     "VIDEOS_UNAVAILABLE" -> "Videos are temporarily unavailable. Please try again later."
@@ -144,7 +136,6 @@ class VideoListViewModel @Inject constructor(
             }
             is AppError.UnauthorizedError -> "Authentication failed. Please login again."
             else -> {
-                // Use the centralized error mapper for common errors
                 ErrorMapper.mapErrorToMessage(error)
             }
         }

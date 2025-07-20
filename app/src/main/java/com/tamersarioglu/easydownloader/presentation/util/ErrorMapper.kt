@@ -2,14 +2,9 @@ package com.tamersarioglu.easydownloader.presentation.util
 
 import com.tamersarioglu.easydownloader.domain.model.AppError
 
-/**
- * Utility object for mapping domain errors to user-friendly messages
- */
+
 object ErrorMapper {
 
-    /**
-     * Maps a Throwable to a user-friendly error message
-     */
     fun mapErrorToMessage(error: Throwable): String {
         return when (error) {
             is AppError.ValidationError -> error.message
@@ -21,9 +16,6 @@ object ErrorMapper {
         }
     }
 
-    /**
-     * Maps API error codes to user-friendly messages for login operations
-     */
     fun mapLoginApiErrorToMessage(error: AppError.ApiError): String {
         return when (error.code) {
             "INVALID_CREDENTIALS" -> "Invalid username or password. Please try again."
@@ -37,9 +29,6 @@ object ErrorMapper {
         }
     }
 
-    /**
-     * Maps API error codes to user-friendly messages for registration operations
-     */
     fun mapRegistrationApiErrorToMessage(error: AppError.ApiError): String {
         return when (error.code) {
             "USER_EXISTS" -> "Username already exists. Please choose a different username."
@@ -56,9 +45,6 @@ object ErrorMapper {
         }
     }
 
-    /**
-     * Maps API error codes to user-friendly messages for authentication operations
-     */
     fun mapAuthApiErrorToMessage(error: AppError.ApiError): String {
         return when (error.code) {
             "TOKEN_EXPIRED" -> "Your session has expired. Please log in again."
@@ -73,11 +59,7 @@ object ErrorMapper {
         }
     }
 
-    /**
-     * Generic API error mapping that falls back to specific mappers based on context
-     */
     private fun mapApiErrorToMessage(error: AppError.ApiError): String {
-        // Default generic mapping - specific contexts should use their own mappers
         return when (error.code) {
             "INVALID_CREDENTIALS" -> "Invalid username or password. Please try again."
             "USER_NOT_FOUND" -> "Account not found. Please check your username or register."
@@ -95,11 +77,6 @@ object ErrorMapper {
         }
     }
 
-    /**
-     * Standard error mapping pattern for ViewModels to ensure consistency
-     * @param error The throwable error to map
-     * @param apiErrorMapper Specific API error mapper function for the context
-     */
     fun mapViewModelError(
         error: Throwable,
         apiErrorMapper: (AppError.ApiError) -> String = ::mapApiErrorToMessage
@@ -114,13 +91,6 @@ object ErrorMapper {
         }
     }
 
-    /**
-     * Standard validation error handling pattern for form-based ViewModels
-     * @param error The validation error to handle
-     * @param onUsernameError Callback to handle username validation errors
-     * @param onPasswordError Callback to handle password validation errors
-     * @param onGeneralError Callback to handle general validation errors
-     */
     fun handleValidationError(
         error: AppError.ValidationError,
         onUsernameError: (String) -> Unit,

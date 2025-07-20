@@ -27,7 +27,7 @@ class GetUserVideosUseCaseTest {
     
     @Test
     fun `invoke should return list of videos on success`() = runTest {
-        // Given
+
         val expectedVideos = listOf(
             VideoItem("1", "https://youtube.com/watch?v=1", VideoStatus.COMPLETE, "2023-01-01"),
             VideoItem("2", "https://instagram.com/p/2", VideoStatus.PENDING, "2023-01-02"),
@@ -35,24 +35,24 @@ class GetUserVideosUseCaseTest {
         )
         `when`(repository.getUserVideos()).thenReturn(Result.success(expectedVideos))
         
-        // When
+
         val result = getUserVideosUseCase()
         
-        // Then
+
         assertTrue(result.isSuccess)
         assertEquals(expectedVideos, result.getOrNull())
     }
     
     @Test
     fun `invoke should return empty list when user has no videos`() = runTest {
-        // Given
+
         val expectedVideos = emptyList<VideoItem>()
         `when`(repository.getUserVideos()).thenReturn(Result.success(expectedVideos))
         
-        // When
+
         val result = getUserVideosUseCase()
         
-        // Then
+
         assertTrue(result.isSuccess)
         assertEquals(expectedVideos, result.getOrNull())
         assertTrue(result.getOrNull()!!.isEmpty())
@@ -60,80 +60,80 @@ class GetUserVideosUseCaseTest {
     
     @Test
     fun `invoke with GetUserVideosParams should work correctly`() = runTest {
-        // Given
+
         val params = GetUserVideosParams
         val expectedVideos = listOf(
             VideoItem("1", "https://youtube.com/watch?v=1", VideoStatus.COMPLETE, "2023-01-01")
         )
         `when`(repository.getUserVideos()).thenReturn(Result.success(expectedVideos))
         
-        // When
+
         val result = getUserVideosUseCase(params)
         
-        // Then
+
         assertTrue(result.isSuccess)
         assertEquals(expectedVideos, result.getOrNull())
     }
     
     @Test
     fun `invoke with network error should return network error`() = runTest {
-        // Given
+
         val networkError = AppError.NetworkError
         `when`(repository.getUserVideos()).thenReturn(Result.failure(networkError))
         
-        // When
+
         val result = getUserVideosUseCase()
         
-        // Then
+
         assertTrue(result.isFailure)
         assertEquals(networkError, result.exceptionOrNull())
     }
     
     @Test
     fun `invoke with unauthorized error should return unauthorized error`() = runTest {
-        // Given
+
         val unauthorizedError = AppError.UnauthorizedError
         `when`(repository.getUserVideos()).thenReturn(Result.failure(unauthorizedError))
         
-        // When
+
         val result = getUserVideosUseCase()
         
-        // Then
+
         assertTrue(result.isFailure)
         assertEquals(unauthorizedError, result.exceptionOrNull())
     }
     
     @Test
     fun `invoke with server error should return server error`() = runTest {
-        // Given
+
         val serverError = AppError.ServerError
         `when`(repository.getUserVideos()).thenReturn(Result.failure(serverError))
         
-        // When
+
         val result = getUserVideosUseCase()
         
-        // Then
+
         assertTrue(result.isFailure)
         assertEquals(serverError, result.exceptionOrNull())
     }
     
     @Test
     fun `invoke with API error should return API error`() = runTest {
-        // Given
+
         val apiError = AppError.ApiError("USER_NOT_FOUND", "User not found")
         `when`(repository.getUserVideos()).thenReturn(Result.failure(apiError))
         
-        // When
+
         val result = getUserVideosUseCase()
         
-        // Then
+
         assertTrue(result.isFailure)
         assertEquals(apiError, result.exceptionOrNull())
     }
     
     @Test
     fun `invoke should handle videos with different statuses correctly`() = runTest {
-        // Given
+
         val expectedVideos = listOf(
             VideoItem("1", "https://youtube.com/watch?v=1", VideoStatus.PENDING, "2023-01-01"),
             VideoItem("2", "https://youtube.com/watch?v=2", VideoStatus.COMPLETE, "2023-01-02"),
@@ -141,10 +141,10 @@ class GetUserVideosUseCaseTest {
         )
         `when`(repository.getUserVideos()).thenReturn(Result.success(expectedVideos))
         
-        // When
+
         val result = getUserVideosUseCase()
         
-        // Then
+
         assertTrue(result.isSuccess)
         val videos = result.getOrNull()!!
         assertEquals(3, videos.size)

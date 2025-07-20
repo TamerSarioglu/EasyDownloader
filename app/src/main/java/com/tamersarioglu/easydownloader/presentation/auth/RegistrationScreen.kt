@@ -64,7 +64,6 @@ fun RegistrationScreen(
     
     var passwordVisible by remember { mutableStateOf(false) }
     
-    // Handle registration success
     LaunchedEffect(registrationUiState.isRegistrationSuccessful) {
         if (registrationUiState.isRegistrationSuccessful) {
             authStateViewModel.onAuthenticationSuccess()

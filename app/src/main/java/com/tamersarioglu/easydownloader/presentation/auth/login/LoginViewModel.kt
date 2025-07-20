@@ -107,9 +107,6 @@ class LoginViewModel @Inject constructor(
         )
     }
 
-    /**
-     * Maps domain errors to user-friendly messages for login operations
-     */
     private fun mapErrorToMessage(error: Throwable): String {
         return ErrorMapper.mapViewModelError(
             error = error,
