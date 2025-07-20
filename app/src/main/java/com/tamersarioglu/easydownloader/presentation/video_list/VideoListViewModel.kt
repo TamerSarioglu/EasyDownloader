@@ -7,6 +7,7 @@ import com.tamersarioglu.easydownloader.domain.model.VideoItem
 import com.tamersarioglu.easydownloader.domain.model.VideoStatus
 import com.tamersarioglu.easydownloader.domain.usecase.GetUserVideosUseCase
 import com.tamersarioglu.easydownloader.domain.usecase.GetVideoStatusUseCase
+import com.tamersarioglu.easydownloader.presentation.util.ErrorMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,24 +35,18 @@ class VideoListViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            try {
-                val result = getUserVideosUseCase()
-                
-                result.fold(
-                    onSuccess = { videos ->
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            videos = videos,
-                            error = null
-                        )
-                    },
-                    onFailure = { error ->
-                        handleError(error)
-                    }
-                )
-            } catch (e: Exception) {
-                handleError(e)
-            }
+            getUserVideosUseCase().fold(
+                onSuccess = { videos ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        videos = videos,
+                        error = null
+                    )
+                },
+                onFailure = { error ->
+                    handleError(error)
+                }
+            )
         }
     }
 
@@ -62,24 +57,18 @@ class VideoListViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            try {
-                val result = getUserVideosUseCase()
-                
-                result.fold(
-                    onSuccess = { videos ->
-                        _uiState.value = _uiState.value.copy(
-                            isRefreshing = false,
-                            videos = videos,
-                            error = null
-                        )
-                    },
-                    onFailure = { error ->
-                        handleError(error)
-                    }
-                )
-            } catch (e: Exception) {
-                handleError(e)
-            }
+            getUserVideosUseCase().fold(
+                onSuccess = { videos ->
+                    _uiState.value = _uiState.value.copy(
+                        isRefreshing = false,
+                        videos = videos,
+                        error = null
+                    )
+                },
+                onFailure = { error ->
+                    handleError(error)
+                }
+            )
         }
     }
 
@@ -90,27 +79,21 @@ class VideoListViewModel @Inject constructor(
 
     fun updateVideoStatus(videoId: String) {
         viewModelScope.launch {
-            try {
-                val result = getVideoStatusUseCase(videoId)
-                
-                result.fold(
-                    onSuccess = { updatedVideoItem ->
-                        val currentVideos = _uiState.value.videos.toMutableList()
-                        val videoIndex = currentVideos.indexOfFirst { it.id == videoId }
-                        
-                        if (videoIndex != -1) {
-                            currentVideos[videoIndex] = updatedVideoItem
-                            _uiState.value = _uiState.value.copy(videos = currentVideos)
-                        }
-                    },
-                    onFailure = { _ ->
-                        // Silently handle individual video status update failures
-                        // to avoid disrupting the overall UI experience
+            getVideoStatusUseCase(videoId).fold(
+                onSuccess = { updatedVideoItem ->
+                    val currentVideos = _uiState.value.videos.toMutableList()
+                    val videoIndex = currentVideos.indexOfFirst { it.id == videoId }
+                    
+                    if (videoIndex != -1) {
+                        currentVideos[videoIndex] = updatedVideoItem
+                        _uiState.value = _uiState.value.copy(videos = currentVideos)
                     }
-                )
-            } catch (e: Exception) {
-                // Silently handle exceptions for individual video status updates
-            }
+                },
+                onFailure = { _ ->
+                    // Silently handle individual video status update failures
+                    // to avoid disrupting the overall UI experience
+                }
+            )
         }
     }
 
@@ -131,31 +114,40 @@ class VideoListViewModel @Inject constructor(
     }
 
     private fun handleError(error: Throwable) {
-        val errorMessage = when (error) {
-            is AppError.NetworkError -> {
-                "Network error. Please check your connection and try again."
-            }
-            is AppError.ServerError -> {
-                "Server is temporarily unavailable. Please try again later."
-            }
-            is AppError.UnauthorizedError -> {
-                // Reset state on authentication error to ensure clean state
-                resetState()
-                "Authentication failed. Please login again."
-            }
-            is AppError.ApiError -> {
-                error.message.ifEmpty { "An error occurred while loading videos." }
-            }
-            else -> {
-                "An unexpected error occurred. Please try again."
-            }
+        // Handle special case for unauthorized errors
+        if (error is AppError.UnauthorizedError) {
+            // Reset state on authentication error to ensure clean state
+            resetState()
         }
+        
+        val errorMessage = mapErrorToMessage(error)
 
         _uiState.value = _uiState.value.copy(
             isLoading = false,
             isRefreshing = false,
             error = errorMessage
         )
+    }
+    
+    /**
+     * Maps domain errors to user-friendly messages for video list operations
+     */
+    private fun mapErrorToMessage(error: Throwable): String {
+        return when (error) {
+            is AppError.ApiError -> {
+                // Custom handling for video list specific API errors
+                when (error.code) {
+                    "NO_VIDEOS_FOUND" -> "You don't have any videos yet."
+                    "VIDEOS_UNAVAILABLE" -> "Videos are temporarily unavailable. Please try again later."
+                    else -> error.message.ifEmpty { "An error occurred while loading videos." }
+                }
+            }
+            is AppError.UnauthorizedError -> "Authentication failed. Please login again."
+            else -> {
+                // Use the centralized error mapper for common errors
+                ErrorMapper.mapErrorToMessage(error)
+            }
+        }
     }
 
     fun isEmptyState(): Boolean {

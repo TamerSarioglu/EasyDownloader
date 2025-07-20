@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tamersarioglu.easydownloader.domain.model.AppError
 import com.tamersarioglu.easydownloader.domain.usecase.SubmitVideoUseCase
+import com.tamersarioglu.easydownloader.presentation.util.ErrorMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,24 +42,22 @@ constructor(private val submitVideoUseCase: SubmitVideoUseCase) : ViewModel() {
                 _uiState.value.copy(isLoading = true, error = null, submissionResult = null)
 
         viewModelScope.launch {
-            submitVideoUseCase(currentUrl)
-                    .onSuccess { videoId ->
-                        _uiState.value =
-                                _uiState.value.copy(
-                                        isLoading = false,
-                                        submissionResult =
-                                                "Video submitted successfully! Video ID: $videoId",
-                                        url = "",
-                                        isUrlValid = false
-                                )
-                    }
-                    .onFailure { error ->
-                        _uiState.value =
-                                _uiState.value.copy(
-                                        isLoading = false,
-                                        error = getErrorMessage(error)
-                                )
-                    }
+            submitVideoUseCase(currentUrl).fold(
+                onSuccess = { videoId ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        submissionResult = "Video submitted successfully! Video ID: $videoId",
+                        url = "",
+                        isUrlValid = false
+                    )
+                },
+                onFailure = { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = getErrorMessage(error)
+                    )
+                }
+            )
         }
     }
 
@@ -96,23 +95,40 @@ constructor(private val submitVideoUseCase: SubmitVideoUseCase) : ViewModel() {
     }
 
     private fun getErrorMessage(error: Throwable): String {
+        // Handle special case for unauthorized errors
+        if (error is AppError.UnauthorizedError) {
+            // Reset state on authentication error to ensure clean state
+            resetState()
+        }
+        
+        // Handle special case for URL validation errors
+        if (error is AppError.ValidationError && error.field == "url" && 
+            error.message.contains("supported platforms")) {
+            return "URL must be from supported platforms: ${SUPPORTED_DOMAINS.joinToString(", ")}"
+        }
+        
+        return mapErrorToMessage(error)
+    }
+    
+    /**
+     * Maps domain errors to user-friendly messages for video submission operations
+     */
+    private fun mapErrorToMessage(error: Throwable): String {
         return when (error) {
-            is AppError.ValidationError -> {
-                if (error.field == "url" && error.message.contains("supported platforms")) {
-                    "URL must be from supported platforms: ${SUPPORTED_DOMAINS.joinToString(", ")}"
-                } else {
-                    error.message
+            is AppError.ApiError -> {
+                // Custom handling for video submission specific API errors
+                when (error.code) {
+                    "INVALID_URL" -> "The provided URL is not valid."
+                    "UNSUPPORTED_PLATFORM" -> "This video platform is not supported. Supported platforms: ${SUPPORTED_DOMAINS.joinToString(", ")}"
+                    "VIDEO_UNAVAILABLE" -> "The video at this URL is unavailable or private."
+                    "DOWNLOAD_LIMIT_EXCEEDED" -> "You have reached your download limit. Please try again later."
+                    else -> error.message.ifEmpty { "An error occurred while submitting the video." }
                 }
             }
-            is AppError.NetworkError -> "Network error. Please check your connection and try again."
-            is AppError.ServerError -> "Server error. Please try again later."
-            is AppError.UnauthorizedError -> {
-                // Reset state on authentication error to ensure clean state
-                resetState()
-                "Authentication error. Please log in again."
+            else -> {
+                // Use the centralized error mapper for common errors
+                com.tamersarioglu.easydownloader.presentation.util.ErrorMapper.mapErrorToMessage(error)
             }
-            is AppError.ApiError -> error.message
-            else -> "An unexpected error occurred. Please try again."
         }
     }
 

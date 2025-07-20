@@ -124,6 +124,9 @@ class AuthStateViewModel @Inject constructor(
     }
 
     private fun handleAuthError(error: Throwable) {
+        // Map the error to a user-friendly message (for logging or UI display if needed)
+        val errorMessage = mapErrorToMessage(error)
+        
         when (error) {
             is AppError.UnauthorizedError -> {
                 // Handle token expiration
