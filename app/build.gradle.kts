@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -40,8 +42,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        // Migration from deprecated kotlinOptions to the new compilerOptions DSL
+        // This change addresses the deprecation warning: 'var jvmTarget: String' is deprecated
+        // The new DSL provides type-safe configuration and better IDE support
+        // Reference: https://kotl.in/u1r8ln
+        compilerOptions {
+            // Using JvmTarget enum instead of JavaVersion.toString() for type safety
+            jvmTarget.set(JvmTarget.JVM_17)
+            // Additional compiler options can be configured here if needed
+        }
     }
     buildFeatures {
         compose = true
