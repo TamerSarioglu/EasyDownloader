@@ -126,6 +126,11 @@ class RegistrationViewModel @Inject constructor(
         _uiState.value = RegistrationUiState()
         _formState.value = RegistrationFormState()
     }
+
+    fun onLogout() {
+        // Reset all UI states to initial values when user logs out
+        resetState()
+    }
 }
 
 data class RegistrationUiState(

@@ -159,4 +159,9 @@ class VideoListViewModel @Inject constructor(
     fun resetState() {
         _uiState.value = VideoListUiState()
     }
+
+    fun onLogout() {
+        // Reset all UI states to initial values when user logs out
+        resetState()
+    }
 }

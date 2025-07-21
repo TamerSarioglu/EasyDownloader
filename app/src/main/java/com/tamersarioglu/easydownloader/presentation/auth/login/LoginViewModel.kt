@@ -126,4 +126,9 @@ class LoginViewModel @Inject constructor(
         _uiState.value = LoginUiState()
         _formState.value = LoginFormState()
     }
+
+    fun onLogout() {
+        // Reset all UI states to initial values when user logs out
+        resetState()
+    }
 }

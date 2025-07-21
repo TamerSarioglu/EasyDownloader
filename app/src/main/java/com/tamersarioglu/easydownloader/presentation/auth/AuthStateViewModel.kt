@@ -85,8 +85,16 @@ class AuthStateViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            repository.clearAuthToken()
-            _authState.value = AuthState(isAuthenticated = false)
+            try {
+                // Clear authentication tokens and user data
+                repository.clearAuthToken()
+                
+                // Reset authentication state to initial values
+                _authState.value = AuthState(isAuthenticated = false, isLoading = false)
+            } catch (e: Exception) {
+                // Even if clearing token fails, reset auth state
+                _authState.value = AuthState(isAuthenticated = false, isLoading = false)
+            }
         }
     }
 

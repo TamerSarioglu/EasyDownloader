@@ -1,6 +1,10 @@
 package com.tamersarioglu.easydownloader.presentation.util
 
 import com.tamersarioglu.easydownloader.domain.model.AppError
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import javax.net.ssl.SSLException
 
 
 object ErrorMapper {
@@ -103,4 +107,83 @@ object ErrorMapper {
             else -> onGeneralError(error.message)
         }
     }
+
+    /**
+     * Maps network exceptions to user-friendly messages
+     */
+    fun mapNetworkExceptionToMessage(exception: Throwable): String {
+        return when (exception) {
+            is UnknownHostException -> "No internet connection. Please check your network settings."
+            is SocketTimeoutException -> "Request timed out. Please check your connection and try again."
+            is SSLException -> "Secure connection failed. Please try again."
+            is IOException -> "Network error occurred. Please check your connection."
+            else -> "Connection failed. Please try again."
+        }
+    }
+
+    /**
+     * Maps video-related API errors to user-friendly messages
+     */
+    fun mapVideoApiErrorToMessage(error: AppError.ApiError): String {
+        return when (error.code) {
+            "INVALID_URL" -> "The provided URL is not valid. Please check the URL format."
+            "UNSUPPORTED_PLATFORM" -> "This video platform is not supported. Please use a supported platform."
+            "VIDEO_UNAVAILABLE" -> "The video is unavailable, private, or has been removed."
+            "VIDEO_TOO_LONG" -> "The video is too long to download. Maximum duration exceeded."
+            "VIDEO_PROCESSING" -> "The video is still being processed. Please try again later."
+            "DOWNLOAD_LIMIT_EXCEEDED" -> "You have reached your download limit. Please try again later."
+            "QUOTA_EXCEEDED" -> "Daily download quota exceeded. Please try again tomorrow."
+            "VIDEO_ALREADY_SUBMITTED" -> "This video has already been submitted for download."
+            "INVALID_VIDEO_FORMAT" -> "The video format is not supported for download."
+            "GEOBLOCKED" -> "This video is not available in your region."
+            "COPYRIGHT_PROTECTED" -> "This video is copyright protected and cannot be downloaded."
+            else -> error.message.ifEmpty { "Video processing failed. Please try again." }
+        }
+    }
+
+    /**
+     * Enhanced error mapping with context-specific handling
+     */
+    fun mapErrorWithContext(
+        error: Throwable,
+        context: ErrorContext = ErrorContext.GENERAL
+    ): String {
+        return when (error) {
+            is AppError.ValidationError -> error.message
+            is AppError.ApiError -> {
+                when (context) {
+                    ErrorContext.LOGIN -> mapLoginApiErrorToMessage(error)
+                    ErrorContext.REGISTRATION -> mapRegistrationApiErrorToMessage(error)
+                    ErrorContext.VIDEO_SUBMISSION -> mapVideoApiErrorToMessage(error)
+                    ErrorContext.VIDEO_LIST -> mapApiErrorToMessage(error)
+                    ErrorContext.AUTH -> mapAuthApiErrorToMessage(error)
+                    ErrorContext.GENERAL -> mapApiErrorToMessage(error)
+                }
+            }
+            is AppError.NetworkError -> "Network connection failed. Please check your internet connection and try again."
+            is AppError.ServerError -> "Server is temporarily unavailable. Please try again in a few moments."
+            is AppError.UnauthorizedError -> {
+                when (context) {
+                    ErrorContext.LOGIN -> "Invalid credentials. Please check your username and password."
+                    else -> "Your session has expired. Please log in again."
+                }
+            }
+            is UnknownHostException, is SocketTimeoutException, is IOException, is SSLException -> {
+                mapNetworkExceptionToMessage(error)
+            }
+            else -> "An unexpected error occurred. Please try again."
+        }
+    }
+}
+
+/**
+ * Enum representing different contexts where errors can occur
+ */
+enum class ErrorContext {
+    GENERAL,
+    LOGIN,
+    REGISTRATION,
+    VIDEO_SUBMISSION,
+    VIDEO_LIST,
+    AUTH
 }

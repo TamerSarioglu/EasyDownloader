@@ -127,6 +127,11 @@ constructor(private val submitVideoUseCase: SubmitVideoUseCase) : ViewModel() {
         _uiState.value = VideoSubmissionUiState()
     }
 
+    fun onLogout() {
+        // Reset all UI states to initial values when user logs out
+        resetState()
+    }
+
     fun getSupportedDomains(): List<String> = SUPPORTED_DOMAINS
 
     companion object {
